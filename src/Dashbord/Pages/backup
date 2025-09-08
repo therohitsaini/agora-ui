@@ -1,0 +1,544 @@
+import React, { useState, useEffect, useRef } from 'react'
+
+function Home() {
+  // State management
+  const [channelName, setChannelName] = useState('test-channel')
+  const [uid, setUid] = useState(1001)
+  const [isJoined, setIsJoined] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [status, setStatus] = useState({ message: '', type: '' })
+  const [localVideoEnabled, setLocalVideoEnabled] = useState(true)
+  const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
+  const [remoteUsers, setRemoteUsers] = useState([])
+  
+  // Refs
+  const localVideoRef = useRef(null)
+  const remoteVideoRef = useRef(null)
+  const clientRef = useRef(null)
+  const localTracksRef = useRef([])
+
+  // Initialize Agora SDK
+  useEffect(() => {
+    const initAgora = async () => {
+      try {
+        // Load Agora SDK dynamically
+        if (!window.AgoraRTC) {
+          const script = document.createElement('script')
+          script.src = 'https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js'
+          script.onload = () => {
+            console.log('Agora SDK loaded successfully')
+            showStatus('Agora SDK loaded successfully', 'success')
+          }
+          document.head.appendChild(script)
+        }
+      } catch (error) {
+        console.error('Error loading Agora SDK:', error)
+        showStatus('Error loading Agora SDK', 'error')
+      }
+    }
+
+    initAgora()
+  }, [])
+
+  // Show status message
+  const showStatus = (message, type) => {
+    setStatus({ message, type })
+    setTimeout(() => {
+      setStatus({ message: '', type: '' })
+    }, 5000)
+  }
+
+  // Get token from server
+  const getToken = async (channelName, uid) => {
+    try {
+      showStatus('Connecting to server...', 'info')
+      
+      const response = await fetch('http://localhost:3001/api/video-call/generate-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          channelName: channelName,
+          uid: uid
+        })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Server error' }))
+        throw new Error(errorData.error || `Server error: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data
+      
+    } catch (error) {
+      console.error('Error getting token:', error)
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Cannot connect to server. Please make sure server is running on port 3001')
+      }
+      
+      throw error
+    }
+  }
+
+  // Join channel
+  const joinChannel = async () => {
+    if (!channelName || !uid) {
+      showStatus('Please enter channel name and user ID', 'error')
+      return
+    }
+
+    setIsLoading(true)
+    
+    try {
+      showStatus('Getting token...', 'info')
+      
+      // Get token from server
+      const tokenData = await getToken(channelName, uid)
+      showStatus('Token received, joining channel...', 'info')
+      
+      // Initialize Agora client
+      if (!clientRef.current) {
+        clientRef.current = window.AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+        
+        // Handle user joined
+        clientRef.current.on("user-published", async (user, mediaType) => {
+          console.log("🔔 User published event received:", user.uid, "Media type:", mediaType)
+          showStatus(`Remote user ${user.uid} joined with ${mediaType}`, 'info')
+          
+          await clientRef.current.subscribe(user, mediaType)
+          console.log("✅ Successfully subscribed to user:", user.uid)
+          
+          if (mediaType === "video") {
+            const remoteVideoTrack = user.videoTrack
+            console.log("📹 Playing remote video for user:", user.uid)
+            remoteVideoTrack.play(remoteVideoRef.current)
+            setRemoteUsers(prev => [...prev, { uid: user.uid, videoTrack: remoteVideoTrack }])
+            showStatus(`Remote video from user ${user.uid} is now playing`, 'success')
+          }
+          
+          if (mediaType === "audio") {
+            const remoteAudioTrack = user.audioTrack
+            console.log("🔊 Playing remote audio for user:", user.uid)
+            remoteAudioTrack.play()
+            showStatus(`Remote audio from user ${user.uid} is now playing`, 'success')
+          }
+        })
+        
+        // Handle user left
+        clientRef.current.on("user-unpublished", (user) => {
+          console.log("👋 User unpublished:", user.uid)
+          showStatus(`User ${user.uid} left the channel`, 'info')
+          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
+        })
+        
+        // Handle user joined channel
+        clientRef.current.on("user-joined", (user) => {
+          console.log("🎉 User joined channel:", user.uid)
+          showStatus(`User ${user.uid} joined the channel`, 'info')
+        })
+        
+        // Handle user left channel
+        clientRef.current.on("user-left", (user) => {
+          console.log("🚪 User left channel:", user.uid)
+          showStatus(`User ${user.uid} left the channel`, 'info')
+          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
+        })
+      }
+      
+      // Create local tracks
+      try {
+        console.log("🎥 Requesting camera and microphone access...")
+        localTracksRef.current = await window.AgoraRTC.createMicrophoneAndCameraTracks()
+        console.log("✅ Local tracks created successfully")
+      } catch (trackError) {
+        console.error("❌ Error creating tracks:", trackError)
+        
+        if (trackError.message.includes("Device in use")) {
+          showStatus("Camera/Microphone is being used by another tab. Please close other tabs or use different browser.", 'error')
+          throw new Error("Device in use: Please close other browser tabs using camera/microphone or try a different browser.")
+        } else if (trackError.message.includes("Starting videoinput failed") || trackError.message.includes("AbortError")) {
+          showStatus("Camera access failed. Please check camera permissions and try again.", 'error')
+          throw new Error("Camera access failed: Please allow camera permissions and make sure no other app is using the camera.")
+        } else if (trackError.message.includes("NotAllowedError")) {
+          showStatus("Camera/Microphone permission denied. Please allow permissions and try again.", 'error')
+          throw new Error("Permission denied: Please allow camera and microphone permissions in your browser.")
+        } else if (trackError.message.includes("NotFoundError")) {
+          showStatus("No camera/microphone found. Please check your devices.", 'error')
+          throw new Error("No devices found: Please check if camera and microphone are connected.")
+        }
+        throw trackError
+      }
+      
+      // Play local video
+      if (localVideoRef.current) {
+        localTracksRef.current[1].play(localVideoRef.current)
+      }
+      
+      // Join channel
+      console.log(`🚀 Joining channel: ${channelName} with UID: ${uid}`)
+      await clientRef.current.join(tokenData.appId, channelName, tokenData.token, uid)
+      console.log(`✅ Successfully joined channel: ${channelName}`)
+      
+      // Publish local tracks
+      console.log("📤 Publishing local tracks...")
+      await clientRef.current.publish(localTracksRef.current)
+      console.log("✅ Local tracks published successfully")
+      
+      setIsJoined(true)
+      showStatus(`Successfully joined channel: ${channelName} with UID: ${uid}`, 'success')
+      
+    } catch (error) {
+      console.error('Error joining channel:', error)
+      showStatus(`Error: ${error.message}`, 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Leave channel
+  const leaveChannel = async () => {
+    try {
+      showStatus('Leaving channel...', 'info')
+      console.log('🚪 Leaving channel and cleaning up...')
+      
+      // Stop and cleanup local tracks
+      if (localTracksRef.current && localTracksRef.current.length > 0) {
+        console.log('🛑 Stopping local tracks...')
+        for (let track of localTracksRef.current) {
+          if (track) {
+            try {
+              if (track.stop) track.stop()
+              if (track.close) track.close()
+              if (track.destroy) track.destroy()
+              console.log('✅ Track cleaned up')
+            } catch (trackError) {
+              console.log('⚠️ Error cleaning up track:', trackError)
+            }
+          }
+        }
+        localTracksRef.current = []
+      }
+      
+      // Leave channel
+      if (clientRef.current && isJoined) {
+        console.log('🚪 Leaving Agora channel...')
+        try {
+          await clientRef.current.leave()
+          console.log('✅ Left Agora channel successfully')
+        } catch (leaveError) {
+          console.log('⚠️ Error leaving channel:', leaveError)
+        }
+      }
+      
+      // Clean up client
+      if (clientRef.current) {
+        try {
+          clientRef.current.removeAllListeners()
+          console.log('✅ Removed all event listeners')
+        } catch (cleanupError) {
+          console.log('⚠️ Error cleaning up client:', cleanupError)
+        }
+        clientRef.current = null
+      }
+      
+      // Reset state
+      setIsJoined(false)
+      setRemoteUsers([])
+      showStatus('Left channel successfully', 'success')
+      console.log('✅ Channel cleanup completed')
+      
+    } catch (error) {
+      console.error('Error leaving channel:', error)
+      showStatus(`Error leaving channel: ${error.message}`, 'error')
+      
+      // Force reset state
+      setIsJoined(false)
+      setRemoteUsers([])
+      clientRef.current = null
+      localTracksRef.current = []
+    }
+  }
+
+  // Toggle local video
+  const toggleLocalVideo = () => {
+    if (localTracksRef.current && localTracksRef.current[1]) {
+      localTracksRef.current[1].setEnabled(!localVideoEnabled)
+      setLocalVideoEnabled(!localVideoEnabled)
+      showStatus(`Local video ${!localVideoEnabled ? 'enabled' : 'disabled'}`, 'info')
+    }
+  }
+
+  // Toggle local audio
+  const toggleLocalAudio = () => {
+    if (localTracksRef.current && localTracksRef.current[0]) {
+      localTracksRef.current[0].setEnabled(!localAudioEnabled)
+      setLocalAudioEnabled(!localAudioEnabled)
+      showStatus(`Local audio ${!localAudioEnabled ? 'enabled' : 'disabled'}`, 'info')
+    }
+  }
+
+  // Release all devices
+  const releaseAllDevices = async () => {
+    try {
+      showStatus('Releasing all devices...', 'info')
+      
+      // Stop all tracks
+      if (localTracksRef.current && localTracksRef.current.length > 0) {
+        for (let track of localTracksRef.current) {
+          if (track) {
+            try {
+              if (track.stop) track.stop()
+              if (track.close) track.close()
+              if (track.destroy) track.destroy()
+            } catch (e) {
+              console.log('⚠️ Error cleaning track:', e)
+            }
+          }
+        }
+        localTracksRef.current = []
+      }
+      
+      // Leave channel if joined
+      if (clientRef.current && isJoined) {
+        try {
+          await clientRef.current.leave()
+        } catch (e) {
+          console.log('⚠️ Error leaving channel:', e)
+        }
+      }
+      
+      // Clean up client
+      if (clientRef.current) {
+        try {
+          clientRef.current.removeAllListeners()
+        } catch (e) {
+          console.log('⚠️ Error removing listeners:', e)
+        }
+        clientRef.current = null
+      }
+      
+      // Reset state
+      setIsJoined(false)
+      setRemoteUsers([])
+      
+      showStatus('All devices released successfully!', 'success')
+      
+    } catch (error) {
+      console.error('Error releasing devices:', error)
+      showStatus(`Error releasing devices: ${error.message}`, 'error')
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            🎥 Agora Video Calling
+          </h1>
+          <p className="text-gray-600">Modern video calling with crystal clear quality</p>
+        </div>
+
+        {/* Main Container */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          {/* Connection Form */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Channel Name
+              </label>
+              <input
+                type="text"
+                value={channelName}
+                onChange={(e) => setChannelName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter channel name"
+                disabled={isJoined}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                User ID
+              </label>
+              <input
+                type="number"
+                value={uid}
+                onChange={(e) => setUid(parseInt(e.target.value))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter user ID"
+                disabled={isJoined}
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            <button
+              onClick={joinChannel}
+              disabled={isLoading || isJoined}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Joining...
+                </>
+              ) : (
+                <>
+                  <span>📞</span>
+                  Join Channel
+                </>
+              )}
+            </button>
+            
+            <button
+              onClick={leaveChannel}
+              disabled={!isJoined}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+            >
+              <span>📴</span>
+              Leave Channel
+            </button>
+            
+            <button
+              onClick={releaseAllDevices}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2"
+            >
+              <span>🔓</span>
+              Release Devices
+            </button>
+          </div>
+
+          {/* Status Message */}
+          {status.message && (
+            <div className={`p-4 rounded-lg mb-6 ${
+              status.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+              status.type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+              'bg-blue-100 text-blue-800 border border-blue-200'
+            }`}>
+              {status.message}
+            </div>
+          )}
+
+          {/* Video Container */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Local Video */}
+            <div className="bg-gray-900 rounded-xl p-4 relative overflow-hidden">
+              <div className="absolute top-4 left-4 z-10">
+                <span className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                  You (UID: {uid})
+                </span>
+              </div>
+              <video
+                ref={localVideoRef}
+                className="w-full h-64 object-cover rounded-lg"
+                autoPlay
+                muted
+                playsInline
+              />
+              {!localVideoEnabled && (
+                <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-4xl mb-2">📹</div>
+                    <div>Video Disabled</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Remote Video */}
+            <div className="bg-gray-900 rounded-xl p-4 relative overflow-hidden">
+              <div className="absolute top-4 left-4 z-10">
+                <span className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                  Remote User
+                </span>
+              </div>
+              <video
+                ref={remoteVideoRef}
+                className="w-full h-64 object-cover rounded-lg"
+                autoPlay
+                playsInline
+              />
+              {remoteUsers.length === 0 && (
+                <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-4xl mb-2">👤</div>
+                    <div>Waiting for remote user...</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Control Panel */}
+          {isJoined && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Call Controls</h3>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={toggleLocalVideo}
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                    localVideoEnabled 
+                      ? 'bg-green-600 text-white hover:bg-green-700' 
+                      : 'bg-gray-600 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  <span>{localVideoEnabled ? '📹' : '📹'}</span>
+                  {localVideoEnabled ? 'Video On' : 'Video Off'}
+                </button>
+                
+                <button
+                  onClick={toggleLocalAudio}
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                    localAudioEnabled 
+                      ? 'bg-green-600 text-white hover:bg-green-700' 
+                      : 'bg-gray-600 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  <span>{localAudioEnabled ? '🎤' : '🎤'}</span>
+                  {localAudioEnabled ? 'Audio On' : 'Audio Off'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Instructions */}
+        {/* <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-blue-800 mb-3">🎯 How to Test Video Calling</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+            <div>
+              <h4 className="font-semibold mb-2">📱 Method 1: Different Browsers (Best for Remote Video)</h4>
+              <ul className="space-y-1">
+                <li>• <strong>Chrome:</strong> User ID 1001, Channel "test-channel" → Join</li>
+                <li>• <strong>Firefox/Edge:</strong> User ID 1002, Channel "test-channel" → Join</li>
+                <li>• <strong>Result:</strong> You'll see remote video in both browsers!</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">🔄 Method 2: Same Browser (Local Video Only)</h4>
+              <ul className="space-y-1">
+                <li>• Join with User ID 1001</li>
+                <li>• Click "Release Devices" button and wait for success message</li>
+                <li>• Change User ID to 1002 and join again</li>
+                <li>• <strong>Result:</strong> You'll see your own video (local only)</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+            <p className="text-yellow-800 text-sm">
+              <strong>⚠️ If "Device in use" error occurs:</strong> Click "Release Devices" button first, 
+              or manually close ALL browser tabs and restart browser.
+            </p>
+          </div>
+        </div> */}
+      </div>
+    </div>
+  )
+}
+
+export default Home
