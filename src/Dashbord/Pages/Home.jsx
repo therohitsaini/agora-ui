@@ -54,7 +54,7 @@ function Home() {
     try {
       showStatus('Connecting to server...', 'info')
       
-      const response = await fetch(`https://sainiweb-agora-backend.onrender.com/api/video-call/generate-token`, {
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

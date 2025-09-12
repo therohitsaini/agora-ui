@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import VoiceCall from './VoiceCall'
 import VideoCall from './VideoCall'
 import { IoCallOutline } from "react-icons/io5";
@@ -8,8 +8,34 @@ function CallApp() {
   const [callType, setCallType] = useState(null) // null, 'voice', or 'video'
   const [channelName, setChannelName] = useState('test-channel')
   const [uid, setUid] = useState(1001)
+  const [user, setUser] = useState([])
 
-  // If call type is selected, render the appropriate component
+
+  const userDetails = async () => {
+    try {
+      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`
+      const fetchData = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // "user-ID": localStorage.getItem("user-ID")
+        },
+      });
+      const { data } = await fetchData.json();
+
+      if (fetchData.ok) {
+        setUser(data)
+      } else {
+        console.log("Failed to fetch user details");
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+  useEffect(() => {
+    userDetails()
+  }, [])
+
   if (callType === 'voice') {
     return (
       <VoiceCall
@@ -61,16 +87,22 @@ function CallApp() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                User ID
+                Select User
               </label>
-              <input
-                type="number"
+              <select
                 value={uid}
                 onChange={(e) => setUid(parseInt(e.target.value))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter user ID"
-              />
+              >
+                <option value="">-- Select a user --</option>
+                {user.map((u) => (
+                  <option key={u.agoraUid} value={u.agoraUid}>
+                    {u.fullname}
+                  </option>
+                ))}
+              </select>
             </div>
+
           </div>
 
           {/* Call Type Selection */}

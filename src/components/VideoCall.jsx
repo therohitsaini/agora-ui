@@ -51,8 +51,8 @@ function VideoCall({ channelName, uid, onBack }) {
   const getToken = async (channelName, uid) => {
     try {
       showStatus('Connecting to server...', 'info')
-      
-      const response = await fetch(`https://sainiweb-agora-backend.onrender.com/api/video-call/generate-token`, {
+      //https://sainiweb-agora-backend.onrender.com
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
