@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { FaVideo } from "react-icons/fa";
 
 function VideoCall({ channelName, uid, onBack }) {
   // State management
@@ -9,7 +10,7 @@ function VideoCall({ channelName, uid, onBack }) {
   const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
   const [remoteUsers, setRemoteUsers] = useState([])
   const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
-  
+
   // Refs
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
@@ -20,22 +21,18 @@ function VideoCall({ channelName, uid, onBack }) {
   useEffect(() => {
     const initAgora = async () => {
       try {
-        // Load Agora SDK dynamically
         if (!window.AgoraRTC) {
           const script = document.createElement('script')
           script.src = 'https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js'
           script.onload = () => {
-            console.log('Agora SDK loaded successfully')
             showStatus('Agora SDK loaded successfully', 'success')
           }
           document.head.appendChild(script)
         }
       } catch (error) {
-        console.error('Error loading Agora SDK:', error)
         showStatus('Error loading Agora SDK', 'error')
       }
     }
-
     initAgora()
   }, [])
 
@@ -51,33 +48,19 @@ function VideoCall({ channelName, uid, onBack }) {
   const getToken = async (channelName, uid) => {
     try {
       showStatus('Connecting to server...', 'info')
-      //https://sainiweb-agora-backend.onrender.com
       const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          channelName: channelName,
-          uid: uid
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelName, uid })
       })
-      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Server error' }))
         throw new Error(errorData.error || `Server error: ${response.status}`)
       }
-      
       const data = await response.json()
       return data
-      
     } catch (error) {
-      console.error('Error getting token:', error)
-      
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Cannot connect to server. Please make sure server is running on port 3001')
-      }
-      
+      showStatus('Error getting token', 'error')
       throw error
     }
   }
@@ -88,124 +71,69 @@ function VideoCall({ channelName, uid, onBack }) {
       showStatus('Please enter channel name and user ID', 'error')
       return
     }
-
     setIsLoading(true)
-    
     try {
       showStatus('Getting token...', 'info')
-      
-      // Get token from server
       const tokenData = await getToken(channelName, uid)
       showStatus('Token received, joining channel...', 'info')
-      
-      // Initialize Agora client
+
       if (!clientRef.current) {
         clientRef.current = window.AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-        
-        // Handle user joined
+
         clientRef.current.on("user-published", async (user, mediaType) => {
-          console.log("🔔 User published event received:", user.uid, "Media type:", mediaType)
           showStatus(`Remote user ${user.uid} joined with ${mediaType}`, 'info')
-          
           await clientRef.current.subscribe(user, mediaType)
-          console.log("✅ Successfully subscribed to user:", user.uid)
-          
           if (mediaType === "video") {
             const remoteVideoTrack = user.videoTrack
-            console.log("📹 Playing remote video for user:", user.uid)
             remoteVideoTrack.play(remoteVideoRef.current)
             setRemoteUsers(prev => [...prev, { uid: user.uid, videoTrack: remoteVideoTrack }])
             showStatus(`Remote video from user ${user.uid} is now playing`, 'success')
           }
-          
           if (mediaType === "audio") {
             const remoteAudioTrack = user.audioTrack
-            console.log("🔊 Playing remote audio for user:", user.uid)
             remoteAudioTrack.play()
             showStatus(`Remote audio from user ${user.uid} is now playing`, 'success')
           }
         })
-        
-        // Handle user left
+
         clientRef.current.on("user-unpublished", (user) => {
-          console.log("👋 User unpublished:", user.uid)
           showStatus(`User ${user.uid} left the channel`, 'info')
           setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
         })
-        
-        // Handle user joined channel
+
         clientRef.current.on("user-joined", (user) => {
-          console.log("🎉 User joined channel:", user.uid)
           showStatus(`User ${user.uid} joined the channel`, 'info')
         })
-        
-        // Handle user left channel
+
         clientRef.current.on("user-left", (user) => {
-          console.log("🚪 User left channel:", user.uid)
           showStatus(`User ${user.uid} left the channel`, 'info')
           setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
         })
       }
-      
+
       // Create local tracks
       try {
-        console.log("🎥 Requesting camera and microphone access...")
         localTracksRef.current = await window.AgoraRTC.createMicrophoneAndCameraTracks()
-        console.log("✅ Local tracks created successfully")
       } catch (trackError) {
-        console.error("❌ Error creating tracks:", trackError)
-        
-        if (trackError.message.includes("Device in use")) {
-          showStatus("Camera/Microphone is being used by another tab. Please close other tabs or use different browser.", 'error')
-          throw new Error("Device in use: Please close other browser tabs using camera/microphone or try a different browser.")
-        } else if (trackError.message.includes("Starting videoinput failed") || trackError.message.includes("AbortError")) {
-          showStatus("Camera access failed. Please check camera permissions and try again.", 'error')
-          throw new Error("Camera access failed: Please allow camera permissions and make sure no other app is using the camera.")
-        } else if (trackError.message.includes("NotAllowedError")) {
-          showStatus("Camera/Microphone permission denied. Please allow permissions and try again.", 'error')
-          throw new Error("Permission denied: Please allow camera and microphone permissions in your browser.")
-        } else if (trackError.message.includes("NotFoundError")) {
-          showStatus("No camera/microphone found. Please check your devices.", 'error')
-          throw new Error("No devices found: Please check if camera and microphone are connected.")
-        }
+        showStatus("Camera/Microphone error: " + trackError.message, 'error')
         throw trackError
       }
-      
-      // Play local video in thumbnail
+
+      // Play local video
       if (localVideoRef.current && localTracksRef.current[1]) {
         try {
           localTracksRef.current[1].play(localVideoRef.current)
-          console.log("✅ Local video playing in thumbnail")
           setLocalVideoLoaded(true)
-          
-          // Additional debugging
-          setTimeout(() => {
-            if (localVideoRef.current) {
-              console.log("Local video element:", localVideoRef.current)
-              console.log("Video srcObject:", localVideoRef.current.srcObject)
-              console.log("Video readyState:", localVideoRef.current.readyState)
-            }
-          }, 1000)
         } catch (error) {
-          console.error("Error playing local video:", error)
+          // ignore
         }
       }
-      
-      // Join channel
-      console.log(`🚀 Joining channel: ${channelName} with UID: ${uid}`)
+
       await clientRef.current.join(tokenData.appId, channelName, tokenData.token, uid)
-      console.log(`✅ Successfully joined channel: ${channelName}`)
-      
-      // Publish local tracks
-      console.log("📤 Publishing local tracks...")
       await clientRef.current.publish(localTracksRef.current)
-      console.log("✅ Local tracks published successfully")
-      
       setIsJoined(true)
       showStatus(`Successfully joined video call: ${channelName} with UID: ${uid}`, 'success')
-      
     } catch (error) {
-      console.error('Error joining channel:', error)
       showStatus(`Error: ${error.message}`, 'error')
     } finally {
       setIsLoading(false)
@@ -216,60 +144,35 @@ function VideoCall({ channelName, uid, onBack }) {
   const leaveChannel = async () => {
     try {
       showStatus('Leaving channel...', 'info')
-      console.log('🚪 Leaving channel and cleaning up...')
-      
-      // Stop and cleanup local tracks
       if (localTracksRef.current && localTracksRef.current.length > 0) {
-        console.log('🛑 Stopping local tracks...')
         for (let track of localTracksRef.current) {
           if (track) {
             try {
               if (track.stop) track.stop()
               if (track.close) track.close()
               if (track.destroy) track.destroy()
-              console.log('✅ Track cleaned up')
-            } catch (trackError) {
-              console.log('⚠️ Error cleaning up track:', trackError)
-            }
+            } catch { }
           }
         }
         localTracksRef.current = []
       }
-      
-      // Leave channel
       if (clientRef.current && isJoined) {
-        console.log('🚪 Leaving Agora channel...')
         try {
           await clientRef.current.leave()
-          console.log('✅ Left Agora channel successfully')
-        } catch (leaveError) {
-          console.log('⚠️ Error leaving channel:', leaveError)
-        }
+        } catch { }
       }
-      
-      // Clean up client
       if (clientRef.current) {
         try {
           clientRef.current.removeAllListeners()
-          console.log('✅ Removed all event listeners')
-        } catch (cleanupError) {
-          console.log('⚠️ Error cleaning up client:', cleanupError)
-        }
+        } catch { }
         clientRef.current = null
       }
-      
-      // Reset state
       setIsJoined(false)
       setRemoteUsers([])
       setLocalVideoLoaded(false)
       showStatus('Left channel successfully', 'success')
-      console.log('✅ Channel cleanup completed')
-      
     } catch (error) {
-      console.error('Error leaving channel:', error)
       showStatus(`Error leaving channel: ${error.message}`, 'error')
-      
-      // Force reset state
       setIsJoined(false)
       setRemoteUsers([])
       setLocalVideoLoaded(false)
@@ -298,7 +201,6 @@ function VideoCall({ channelName, uid, onBack }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Pre-join Setup */}
       {!isJoined && (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -311,7 +213,6 @@ function VideoCall({ channelName, uid, onBack }) {
               </h1>
               <p className="text-gray-600">Audio + Video required</p>
             </div>
-
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -336,7 +237,6 @@ function VideoCall({ channelName, uid, onBack }) {
                 />
               </div>
             </div>
-
             <div className="space-y-3">
               <button
                 onClick={joinChannel}
@@ -350,12 +250,11 @@ function VideoCall({ channelName, uid, onBack }) {
                   </>
                 ) : (
                   <>
-                    <span>📹</span>
+                    <span> <FaVideo />  </span>
                     Join Video Call
                   </>
                 )}
               </button>
-
               <button
                 onClick={onBack}
                 className="w-full px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center justify-center gap-2"
@@ -364,14 +263,11 @@ function VideoCall({ channelName, uid, onBack }) {
                 Back to Selection
               </button>
             </div>
-
-            {/* Status Message */}
             {status.message && (
-              <div className={`mt-4 p-3 rounded-lg text-sm ${
-                status.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+              <div className={`mt-4 p-3 rounded-lg text-sm ${status.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
                 status.type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
-                'bg-blue-100 text-blue-800 border border-blue-200'
-              }`}>
+                  'bg-blue-100 text-blue-800 border border-blue-200'
+                }`}>
                 {status.message}
               </div>
             )}
@@ -385,7 +281,7 @@ function VideoCall({ channelName, uid, onBack }) {
           {/* Top Header */}
           <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button 
+              <button
                 onClick={onBack}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
@@ -411,159 +307,34 @@ function VideoCall({ channelName, uid, onBack }) {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 flex relative">
-            {/* Main Video Area */}
-            <div className="flex-1 flex flex-col">
-              {/* Main Video Feed */}
-              <div className="flex-1 bg-gray-800 relative h-[50vh]">
-                <video
-                  ref={remoteVideoRef}
-                  className="h-[90vh] w-full object-cover"
-                  autoPlay
-                  playsInline
-                />
-                {remoteUsers.length === 0 && (
-                  <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-medium mb-2">Waiting for participants...</h3>
-                      <p className="text-gray-400">Share the channel name with others to join</p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Video Controls Overlay */}
-                <div className="absolute top-4 left-4 flex space-x-2">
-                  {remoteUsers.map((user, index) => (
-                    <div key={user.uid} className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                      User {user.uid}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Participant Thumbnails */}
-              <div className="bg-gray-800 p-4 absolute">
-                <div className="flex space-x-4 justify-center">
-                  {/* Local Video Thumbnail */}
-                  <div className="relative w-32 h-24 bg-gray-700 rounded-lg overflow-hidden">
-                    <video
-                      ref={localVideoRef}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      playsInline
-                      style={{ backgroundColor: '#374151' }}
-                    />
-                    {!localVideoEnabled && (
-                      <div className="absolute inset-0 bg-gray-600 flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"/>
-                        </svg>
-                      </div>
-                    )}
-                    {/* Fallback when video is not loaded */}
-                    {localVideoEnabled && !localVideoLoaded && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <div className="text-center text-white">
-                          <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-1">
-                            <span className="text-sm font-bold">You</span>
-                          </div>
-                          <div className="text-xs">Loading...</div>
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                      You
-                    </div>
-                    <div className="absolute top-1 right-1">
-                      <button
-                        onClick={toggleLocalVideo}
-                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                          localVideoEnabled ? 'bg-green-500' : 'bg-red-500'
-                        }`}
-                      >
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Remote User Thumbnails */}
-                  {remoteUsers.map((user, index) => (
-                    <div key={user.uid} className="relative w-32 h-24 bg-gray-700 rounded-lg overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">U{user.uid}</span>
-                      </div>
-                      <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                        User {user.uid}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom Controls */}
-              <div className="bg-white border-t border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-center space-x-4">
-                  <button
-                    onClick={toggleLocalAudio}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                      localAudioEnabled 
-                        ? 'bg-gray-200 hover:bg-gray-300' 
-                        : 'bg-red-500 hover:bg-red-600'
-                    }`}
-                  >
-                    <svg className={`w-6 h-6 ${localAudioEnabled ? 'text-gray-700' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={toggleLocalVideo}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                      localVideoEnabled 
-                        ? 'bg-gray-200 hover:bg-gray-300' 
-                        : 'bg-red-500 hover:bg-red-600'
-                    }`}
-                  >
-                    <svg className={`w-6 h-6 ${localVideoEnabled ? 'text-gray-700' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                    </svg>
-                  </button>
-
-                  <button className="w-12 h-12 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
-                    <svg className="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={leaveChannel}
-                    className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
-                  >
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+          <div className="flex-1 flex">
+            {/* Main Video Area: Side by Side */}
+            <div className="flex-1 flex flex-row items-center justify-center bg-gray-800">
+              {/* Local Video */}
+              <video
+                ref={localVideoRef}
+                className="h-[90vh] w-1/2 object-cover border-4 border-blue-500 rounded-lg m-2"
+                autoPlay
+                muted
+                playsInline
+                style={{ backgroundColor: '#374151' }}
+              />
+              {/* Remote Video */}
+              <video
+                ref={remoteVideoRef}
+                className="h-[90vh] w-1/2 object-cover border-4 border-green-500 rounded-lg m-2"
+                autoPlay
+                playsInline
+              />
             </div>
 
-            {/* Right Sidebar */}
+            {/* Right Sidebar (Participants, Chat, etc.) */}
             <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
               {/* Participants Tab */}
               <div className="p-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800">Participants</h3>
                 <p className="text-sm text-gray-500">{remoteUsers.length + 1} participant(s)</p>
               </div>
-
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="space-y-3">
                   {/* Local User */}
@@ -576,23 +347,20 @@ function VideoCall({ channelName, uid, onBack }) {
                       <p className="text-xs text-gray-500">Host</p>
                     </div>
                     <div className="flex space-x-1">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        localAudioEnabled ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${localAudioEnabled ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
                         <svg className={`w-3 h-3 ${localAudioEnabled ? 'text-green-600' : 'text-red-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
                         </svg>
                       </div>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        localVideoEnabled ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${localVideoEnabled ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
                         <svg className={`w-3 h-3 ${localVideoEnabled ? 'text-green-600' : 'text-red-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
                         </svg>
                       </div>
                     </div>
                   </div>
-
                   {/* Remote Users */}
                   {remoteUsers.map((user, index) => (
                     <div key={user.uid} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg">
@@ -606,12 +374,12 @@ function VideoCall({ channelName, uid, onBack }) {
                       <div className="flex space-x-1">
                         <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
                           <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
                           </svg>
                         </div>
                         <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
                           <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
                           </svg>
                         </div>
                       </div>
@@ -619,7 +387,6 @@ function VideoCall({ channelName, uid, onBack }) {
                   ))}
                 </div>
               </div>
-
               {/* Chat Section */}
               <div className="border-t border-gray-200 p-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Chat</h3>
@@ -637,11 +404,52 @@ function VideoCall({ channelName, uid, onBack }) {
                   />
                   <button className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled>
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+          {/* Bottom Controls */}
+          <div className="bg-white border-t border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-center space-x-4">
+              <button
+                onClick={toggleLocalAudio}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${localAudioEnabled
+                  ? 'bg-gray-200 hover:bg-gray-300'
+                  : 'bg-red-500 hover:bg-red-600'
+                  }`}
+              >
+                <svg className={`w-6 h-6 ${localAudioEnabled ? 'text-gray-700' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+              </button>
+              <button
+                onClick={toggleLocalVideo}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${localVideoEnabled
+                  ? 'bg-gray-200 hover:bg-gray-300'
+                  : 'bg-red-500 hover:bg-red-600'
+                  }`}
+              >
+                <svg className={`w-6 h-6 ${localVideoEnabled ? 'text-gray-700' : 'text-white'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+              </button>
+              <button className="w-12 h-12 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
+                <svg className="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" />
+                </svg>
+              </button>
+              <button
+                onClick={leaveChannel}
+                className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
+              >
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11-.53-.29-.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>

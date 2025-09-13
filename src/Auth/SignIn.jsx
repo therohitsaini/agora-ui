@@ -10,7 +10,7 @@ function SignIn() {
     const [emailEmptyTrue, setEmailEmptyTrue] = useState(false);
     const [passwordEmptyTrue, setPasswordEmptyTrue] = useState(false);
 
-    const emailUsername = useRef("");
+    const email = useRef("");
     const password = useRef("");
     const navigate = useNavigate();
     // const dispatch = useDispatch();
@@ -19,48 +19,48 @@ function SignIn() {
         e.preventDefault();
 
         const userObject = {
-            email: emailUsername.current.value,
+            email: email.current.value,
             password: password.current.value,
         };
 
-        if (emailUsername.current.value.length === 0) {
+        if (!userObject.email) {
             setEmailEmptyTrue(true);
             return;
         }
 
-        if (password.current.value.length === 0) {
+        if (!userObject.password) {
             setPasswordEmptyTrue(true);
             return;
         }
-        // "http://localhost:3001"
+
         try {
             const url = `${import.meta.env.VITE_BACK_END_URL}/api/auth/signin`;
+
             const fetchData = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(userObject),
             });
 
+            if (!fetchData.ok) {
+                const error = await fetchData.json();
+                toast.error(error.message || "Login failed!");
+                return;
+            }
+
             const response = await fetchData.json();
             console.log("response", response);
 
-            toast(response.message || "Something happened!");
+            toast.success(response.message || "Login successful!");
 
-            if (fetchData.ok) {
-                // dispatch(fetchFullName(response.userData));
+            if (response?.userData?._id) {
                 localStorage.setItem("user-ID", response.userData._id);
-                localStorage.setItem("header-email", response.userData.email);
-                localStorage.setItem("header-username", response.userData.username);
-                localStorage.setItem("set-role", response.userData.role);
-
-                setTimeout(() => {
-                    navigate("/callapp");
-                }, 1000);
-            } else {
-                navigate("/");
             }
+
+            navigate("/callapp");
         } catch (err) {
-            console.log("sign in failed ...! ", err);
+            console.error("sign in failed ...! ", err);
+            toast.error("Server not reachable!");
         }
     };
 
@@ -100,7 +100,7 @@ function SignIn() {
                                 Email
                             </span>
                             <input
-                                ref={emailUsername}
+                                ref={email}
                                 className={`p-2 border-b outline-0 ${emailEmptyTrue ? "border-red-400" : "border-black/50"
                                     }`}
                                 type="text"

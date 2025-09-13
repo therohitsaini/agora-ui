@@ -52,7 +52,7 @@ function SignUp() {
         }
 
         try {
-            const url = `https://sainiweb-agora-backend.onrender.com/api/auth/signup`
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api/auth/signup`
             const fetchData = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
