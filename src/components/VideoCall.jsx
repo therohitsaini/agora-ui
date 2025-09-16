@@ -1,11 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FaVideo } from "react-icons/fa";
 
-function VideoCall({ channelName, uid, onBack ,isJoined,isLoading,status,localVideoEnabled,localAudioEnabled,remoteUsers,localVideoLoaded,joinChannel,leaveChannel,toggleLocalVideo,toggleLocalAudio,localVideoRef,remoteVideoRef,}) {
-  // State management
-
-
-
+function VideoCall({
+  channelName,
+  uid,
+  onBack,
+  isJoined,
+  isLoading,
+  status,
+  localVideoEnabled,
+  localAudioEnabled,
+  remoteUsers,
+  localVideoLoaded,
+  joinChannel,
+  leaveChannel,
+  toggleLocalVideo,
+  toggleLocalAudio,
+  localVideoRef,
+  remoteVideoRef,
+}) {
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -125,7 +138,7 @@ function VideoCall({ channelName, uid, onBack ,isJoined,isLoading,status,localVi
                 autoPlay
                 muted
                 playsInline
-             
+
               />
               {/* Remote Video */}
               <video
@@ -136,7 +149,7 @@ function VideoCall({ channelName, uid, onBack ,isJoined,isLoading,status,localVi
               />
             </div>
 
-        
+
             <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
               {/* Participants Tab */}
               <div className="p-4 border-b border-gray-200">

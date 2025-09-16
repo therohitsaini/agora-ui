@@ -5,6 +5,20 @@ import { IoCallOutline } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
 import { io } from "socket.io-client";
 import CallAlert from "./CallAlert";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Avatar,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 function CallApp() {
   const [socket, setSocket] = useState(null);
@@ -24,10 +38,13 @@ function CallApp() {
   const [joined, setJoined] = useState(false)
 
 
+
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
+
+  const navigator = useNavigate();
 
 
 
@@ -85,10 +102,10 @@ function CallApp() {
       return;
     }
 
-    // Generate Agora-compatible channel name (max 64 bytes, only alphanumeric)
-    const timestamp = Date.now().toString().slice(-8); // Last 8 digits
-    const shortUserId = myUserId.slice(-6); // Last 6 chars
-    const shortToUid = toUid.slice(-6); // Last 6 chars
+
+    const timestamp = Date.now().toString().slice(-8);
+    const shortUserId = myUserId.slice(-6);
+    const shortToUid = toUid.slice(-6);
     const callChannelName = `call${shortUserId}${shortToUid}${timestamp}`;
     setChannelName(callChannelName);
 
@@ -114,7 +131,6 @@ function CallApp() {
       setCallType(incomingCall.type);
       setChannelName(incomingCall.channelName);
       setIsInCall(true);
-      // console.log('State set - callType:', incomingCall.type, 'channelName:', incomingCall.channelName, 'isInCall: true');
       socket.emit('call-accepted', {
         toUid: incomingCall.fromUid,
         fromUid: myUserId,
@@ -122,7 +138,7 @@ function CallApp() {
         channelName: incomingCall.channelName
       });
 
-    
+
     } else {
       console.log(' Missing socket or incomingCall:', { socket: !!socket, incomingCall });
     }
@@ -298,8 +314,6 @@ function CallApp() {
     }
   }, [isJoined, isInCall, callType]);
 
-
-
   const leaveChannel = async () => {
     try {
       showStatus('Leaving channel...', 'info')
@@ -327,14 +341,14 @@ function CallApp() {
         clientRef.current = null
       }
       setIsJoined(false)
-      setIsInCall(false) 
+      setIsInCall(false)
       setRemoteUsers([])
       setLocalVideoLoaded(false)
       showStatus('Left channel successfully', 'success')
     } catch (error) {
       showStatus(`Error leaving channel: ${error.message}`, 'error')
       setIsJoined(false)
-      setIsInCall(false) 
+      setIsInCall(false)
       setRemoteUsers([])
       setLocalVideoLoaded(false)
       clientRef.current = null
@@ -367,6 +381,9 @@ function CallApp() {
         channelName={channelName}
         uid={uid}
         onBack={endCall}
+        isInCall={isInCall}
+        setIsInCall={setIsInCall}
+        callType={callType}
       />
     );
   }
@@ -396,88 +413,192 @@ function CallApp() {
 
   if (incomingCall) {
     return (
-      <CallAlert acceptCall={acceptCall} rejectCall={rejectCall} incomingCall={incomingCall} />
+      <CallAlert
+        acceptCall={acceptCall}
+        rejectCall={rejectCall}
+        incomingCall={incomingCall}
+        open={!!incomingCall}
+      />
     );
   }
 
   const logOutButton = () => {
+    navigator('/');
     localStorage.removeItem("user-ID");
     window.location.reload();
+
   }
 
   return (
-    <div className="min-h-screen w-full rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-300 w-[700px] ">
-        <div className="header  p-5 flex justify-end">
-          <button onClick={logOutButton} className="text-red-500 hover:underline font-bold">Log Out</button>
-        </div>
-        <div className="text-center pt-5 ">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-3xl"><IoCallOutline /></span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Agora Call App</h1>
-          <p className="text-gray-600">Choose your call type to start</p>
-        </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 4,
+        background: "linear-gradient(to bottom right, #eff6ff, #e0e7ff)",
+      }} >
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: 6,
+          border: "2px solid #d1d5db",
+          width: 700,
+        }}
+      >
 
-        <div className="main-content rounded-lg p-10 flex flex-col gap-5 items-center justify-center w-full">
-          {/* Channel and UID Input */}
-          <div className="space-y-4 mb-8 w-full">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Channel Name</label>
-              <input
-                type="text"
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}
+        >
+          <Button
+            onClick={logOutButton}
+            sx={{ fontWeight: "bold", color: "error.main", textDecoration: "underline" }}
+          >
+            Log Out
+          </Button>
+        </Box>
+
+
+        <CardContent sx={{ textAlign: "center", pt: 2 }}>
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+              mb: 3,
+              mx: "auto",
+              background: "linear-gradient(to bottom right, #2563eb, #7c3aed)",
+            }}
+          >
+            <IoCallOutline size={30} />
+          </Avatar>
+          <Typography variant="h4" fontWeight="bold" color="text.primary" gutterBottom>
+            Agora Call App
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Choose your call type to start
+          </Typography>
+        </CardContent>
+
+
+        <CardContent sx={{ p: 4, py: 0 }}>
+          <Box sx={{ mb: 5 }}>
+            <Box sx={{ mb: 3 }}>
+              <InputLabel shrink>Channel Name</InputLabel>
+              <TextField
+                fullWidth
+                size="small"
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter channel name"
+                variant="outlined"
+                sx={{ mt: 1 }}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Select User</label>
-              <select
-                value={uid}
-                onChange={(e) => setUid(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="">-- Select a user --</option>
-                {user.map((u) => (
-                  <option key={u._id} value={u._id}>{u.fullname}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+            </Box>
 
-          {/* Call Type Selection */}
-          <div className="flex w-full gap-5">
-            <button
+            <Box>
+              <FormControl fullWidth size="small" >
+                <InputLabel>Select User</InputLabel>
+                <Select
+                  value={uid}
+                  onChange={(e) => setUid(e.target.value)}
+                  label="Select User"
+                >
+                  <MenuItem value="">
+                    -- Select a user --
+                  </MenuItem>
+                  {user.map((u) => (
+                    <MenuItem key={u._id} value={u._id}>
+                      {u.fullname}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+
+
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <Button
+              fullWidth
               onClick={() => startCall(uid, "voice")}
-              className="w-full px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-2xl text-green-500"><IoCallOutline /></span>
-              </div>
-              <div className="text-left">
-                <div className="text-lg font-semibold">Voice Call</div>
-                <div className="text-sm opacity-90">Audio only - No video</div>
-              </div>
-            </button>
+              sx={{
 
-            <button
-              onClick={() => startCall(uid, "video")}
-              className="w-full px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                background: "linear-gradient(to right, #22c55e, #16a34a)",
+                color: "white",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: "bold",
+                boxShadow: 4,
+                "&:hover": {
+                  background: "linear-gradient(to right, #16a34a, #15803d)",
+                  transform: "translateY(-2px)",
+                  boxShadow: 6,
+                },
+              }}
             >
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-2xl text-blue-500"><FaVideo /></span>
-              </div>
-              <div className="text-left">
-                <div className="text-lg font-semibold">Video Call</div>
-                <div className="text-sm opacity-90">Audio + Video</div>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(253, 250, 250, 0.2)",
+                  mr: 2,
+                  width: 40,
+                  height: 40,
+                }}
+              >
+                <IoCallOutline size={20} color="#ffffff" />
+              </Avatar>
+              <Box textAlign="left">
+                <Typography variant="subtitle1" fontWeight="600">
+                  Voice Call
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Audio only - No video
+                </Typography>
+              </Box>
+            </Button>
+
+            <Button
+              fullWidth
+              onClick={() => startCall(uid, "video")}
+              sx={{
+
+                background: "linear-gradient(to right, #3b82f6, #2563eb)",
+                color: "white",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: "bold",
+
+                "&:hover": {
+                  background: "linear-gradient(to right, #2563eb, #1d4ed8)",
+                  transform: "translateY(-2px)",
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.2)",
+                  mr: 2,
+                  width: 40,
+                  height: 40,
+                }}
+              >
+                <FaVideo size={20} color="#feffff" />
+              </Avatar>
+              <Box textAlign="left">
+                <Typography variant="subtitle1" fontWeight="600">
+                  Video Call
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Audio + Video
+                </Typography>
+              </Box>
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
 

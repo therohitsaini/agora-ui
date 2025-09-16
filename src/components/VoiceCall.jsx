@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { IoCallOutline } from "react-icons/io5";
 
-function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
+function VoiceCall({ channelName, uid, onBack, socket, toUid, isInCall, setIsInCall, callType }) {
 
   const [isJoined, setIsJoined] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -39,7 +39,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }, 5000)
   }
 
- 
+
   const getToken = async (channelName, uid) => {
     try {
       showStatus('Connecting to server...', 'info')
@@ -68,10 +68,10 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }
     setIsLoading(true)
     try {
-   
+
       if (socket && toUid) {
         socket.emit("call-user", {
-          toUid,    
+          toUid,
           fromUid: uid,
           type: "voice"
         })
@@ -121,13 +121,21 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
       await clientRef.current.join(tokenData.appId, channelName, tokenData.token, uid)
       await clientRef.current.publish(localTracksRef.current)
       setIsJoined(true)
+      setIsInCall(false)
       showStatus(`Successfully joined voice call: ${channelName} with UID: ${uid}`, 'success')
     } catch (error) {
       showStatus(`Error: ${error.message}`, 'error')
+  
     } finally {
       setIsLoading(false)
     }
   }
+  useEffect(() => {
+    if (isInCall && callType === "voice" && !isJoined && !clientRef.current) {
+      joinChannel();
+    }
+  }, [isJoined, isInCall, callType]);
+
 
   const leaveChannel = async () => {
     try {
@@ -178,7 +186,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
- 
+
       {!isJoined && (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -245,7 +253,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
               </button>
             </div>
 
-     
+
             {status.message && (
               <div className={`mt-4 p-3 rounded-lg text-sm ${status.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
                 status.type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
@@ -258,7 +266,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
         </div>
       )}
 
-  
+
       {isJoined && (
         <div className="h-screen flex flex-col bg-gray-900">
           {/* Top Header */}
@@ -289,7 +297,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
             </div>
           </div>
 
-        
+
           <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-emerald-200">
             {/* Voice Call Visual */}
             <div className="text-center mb-8">
@@ -300,7 +308,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
               <p className="text-gray-600">You are connected to the voice channel</p>
             </div>
 
-       
+
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mb-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Participants</h3>
               <div className="space-y-3">
@@ -321,7 +329,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
                   </div>
                 </div>
 
-           
+
                 {remoteUsers.map((user) => (
                   <div key={user.uid} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
