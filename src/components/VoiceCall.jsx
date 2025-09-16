@@ -2,18 +2,18 @@ import React, { useState, useEffect, useRef } from 'react'
 import { IoCallOutline } from "react-icons/io5";
 
 function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
-  // State management
+
   const [isJoined, setIsJoined] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState({ message: '', type: '' })
   const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
   const [remoteUsers, setRemoteUsers] = useState([])
 
-  // Refs
+
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
 
-  // Initialize Agora SDK
+
   useEffect(() => {
     const initAgora = async () => {
       try {
@@ -32,7 +32,6 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     initAgora()
   }, [])
 
-  // Show status message
   const showStatus = (message, type) => {
     setStatus({ message, type })
     setTimeout(() => {
@@ -40,7 +39,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }, 5000)
   }
 
-  // Get token from server
+ 
   const getToken = async (channelName, uid) => {
     try {
       showStatus('Connecting to server...', 'info')
@@ -61,7 +60,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }
   }
 
-  // Join channel
+
   const joinChannel = async () => {
     if (!channelName || !uid) {
       showStatus('Please enter channel name and user ID', 'error')
@@ -69,11 +68,11 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }
     setIsLoading(true)
     try {
-      // Socket.IO: Send call notification
+   
       if (socket && toUid) {
         socket.emit("call-user", {
-          toUid,      // receiver user id
-          fromUid: uid, // caller user id
+          toUid,    
+          fromUid: uid,
           type: "voice"
         })
       }
@@ -111,7 +110,6 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
         })
       }
 
-      // Create local audio track only
       try {
         const localAudioTrack = await window.AgoraRTC.createMicrophoneAudioTrack()
         localTracksRef.current = [localAudioTrack]
@@ -131,7 +129,6 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }
   }
 
-  // Leave channel
   const leaveChannel = async () => {
     try {
       showStatus('Leaving channel...', 'info')
@@ -170,7 +167,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
     }
   }
 
-  // Toggle local audio
+
   const toggleLocalAudio = () => {
     if (localTracksRef.current && localTracksRef.current[0]) {
       localTracksRef.current[0].setEnabled(!localAudioEnabled)
@@ -181,7 +178,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Pre-join Setup */}
+ 
       {!isJoined && (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -248,7 +245,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
               </button>
             </div>
 
-            {/* Status Message */}
+     
             {status.message && (
               <div className={`mt-4 p-3 rounded-lg text-sm ${status.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
                 status.type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
@@ -261,7 +258,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
         </div>
       )}
 
-      {/* Voice Call Interface */}
+  
       {isJoined && (
         <div className="h-screen flex flex-col bg-gray-900">
           {/* Top Header */}
@@ -292,7 +289,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
             </div>
           </div>
 
-          {/* Main Content Area */}
+        
           <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-emerald-200">
             {/* Voice Call Visual */}
             <div className="text-center mb-8">
@@ -303,7 +300,7 @@ function VoiceCall({ channelName, uid, onBack, socket, toUid }) {
               <p className="text-gray-600">You are connected to the voice channel</p>
             </div>
 
-            {/* Participants List */}
+       
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mb-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Participants</h3>
               <div className="space-y-3">

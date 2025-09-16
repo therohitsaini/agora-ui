@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VoiceCall from "./VoiceCall";
 import VideoCall from "./VideoCall";
 import { IoCallOutline } from "react-icons/io5";
@@ -14,23 +14,31 @@ function CallApp() {
   const [user, setUser] = useState([]);
   const [incomingCall, setIncomingCall] = useState(null);
   const [isInCall, setIsInCall] = useState(false);
+  const [isJoined, setIsJoined] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [status, setStatus] = useState({ message: '', type: '' })
+  const [localVideoEnabled, setLocalVideoEnabled] = useState(true)
+  const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
+  const [remoteUsers, setRemoteUsers] = useState([])
+  const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
+  const [joined, setJoined] = useState(false)
 
-  // Debug logs
-  console.log("🔍 Current state:", { callType, channelName, uid, incomingCall, isInCall });
-  console.log("🔍 User list:", user.map(u => ({ _id: u._id, fullname: u.fullname, agoraUid: u.agoraUid })));
+
+  const localVideoRef = useRef(null)
+  const remoteVideoRef = useRef(null)
+  const clientRef = useRef(null)
+  const localTracksRef = useRef([])
+
+
 
   const myUserId = localStorage.getItem("user-ID");
 
-  // 1️⃣ Socket connection
+
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
     const s = io(backendUrl);
     setSocket(s);
-
-    // 2️⃣ Register user
     s.emit('register', myUserId);
-
-    // 3️⃣ Listen for events
     s.on('incoming-call', (callData) => {
       console.log('📞 Incoming call:', callData);
       setIncomingCall(callData);
@@ -39,11 +47,10 @@ function CallApp() {
     s.on('call-accepted', (callData) => {
       console.log('✅ Call accepted:', callData);
 
-      // Find receiver's agoraUid from user list
+
       const receiverUser = user.find(u => u._id === callData.fromUid);
       const receiverAgoraUid = receiverUser?.agoraUid || callData.fromUid;
 
-      // Set UID for Agora call
       setUid(receiverAgoraUid);
       setCallType(callData.type);
       setChannelName(callData.channelName);
@@ -72,7 +79,6 @@ function CallApp() {
     };
   }, [myUserId, user]);
 
-  // 4️⃣ Start call
   const startCall = (toUid, type = 'voice') => {
     if (!socket || !toUid) {
       alert("Please select a user to call");
@@ -93,47 +99,36 @@ function CallApp() {
       channelName: callChannelName
     });
 
-    console.log(`📤 Starting ${type} call to ${toUid}`);
+    console.log(` Starting ${type} call to ${toUid}`);
   };
 
-  // 5️⃣ Accept call
+
   const acceptCall = () => {
-    console.log('🔍 Accept call clicked!', { socket: !!socket, incomingCall });
+    console.log(' Accept call clicked!', { socket: !!socket, incomingCall });
 
     if (socket && incomingCall) {
-      // Find caller's agoraUid from user list
+
       const callerUser = user.find(u => u._id === incomingCall.fromUid);
       const callerAgoraUid = callerUser?.agoraUid || incomingCall.fromUid;
-
-      console.log('🔍 Caller user found:', callerUser);
-      console.log('🔍 Caller agoraUid:', callerAgoraUid);
-      console.log('🔍 Incoming call data:', incomingCall);
-
-      // Set UID for Agora call
       setUid(callerAgoraUid);
-
-      // Set call type and channel name immediately
       setCallType(incomingCall.type);
       setChannelName(incomingCall.channelName);
       setIsInCall(true);
-
-      console.log('✅ State set - callType:', incomingCall.type, 'channelName:', incomingCall.channelName, 'isInCall: true');
-
+      // console.log('State set - callType:', incomingCall.type, 'channelName:', incomingCall.channelName, 'isInCall: true');
       socket.emit('call-accepted', {
         toUid: incomingCall.fromUid,
         fromUid: myUserId,
         type: incomingCall.type,
         channelName: incomingCall.channelName
       });
-      console.log('✅ Call accepted with agoraUid:', callerAgoraUid);
-      console.log('✅ Call type set to:', incomingCall.type);
-      console.log('✅ Channel name set to:', incomingCall.channelName);
+
+    
     } else {
-      console.log('❌ Missing socket or incomingCall:', { socket: !!socket, incomingCall });
+      console.log(' Missing socket or incomingCall:', { socket: !!socket, incomingCall });
     }
   };
 
-  // 6️⃣ Reject call
+
   const rejectCall = () => {
     if (socket && incomingCall) {
       socket.emit('call-rejected', {
@@ -141,11 +136,11 @@ function CallApp() {
         fromUid: myUserId
       });
       setIncomingCall(null);
-      console.log('❌ Call rejected');
+      console.log(' Call rejected');
     }
   };
 
-  // 7️⃣ End call
+
   const endCall = () => {
     if (socket) {
       socket.emit('call-ended', {
@@ -154,11 +149,11 @@ function CallApp() {
       });
       setCallType(null);
       setIsInCall(false);
-      console.log('📞 Call ended');
+      console.log(' Call ended');
     }
   };
 
-  // Fetch users
+
   const userDetails = async () => {
     try {
       const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`;
@@ -174,7 +169,198 @@ function CallApp() {
     userDetails();
   }, []);
 
-  // 8️⃣ Render call screen if in call
+
+
+
+  useEffect(() => {
+    const initAgora = async () => {
+      try {
+        if (!window.AgoraRTC) {
+          const script = document.createElement('script')
+          script.src = 'https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js'
+          script.onload = () => {
+            showStatus('Agora SDK loaded successfully', 'success')
+          }
+          document.head.appendChild(script)
+        }
+      } catch (error) {
+        showStatus('Error loading Agora SDK', 'error')
+      }
+    }
+    initAgora()
+  }, [])
+
+
+  const showStatus = (message, type) => {
+    setStatus({ message, type })
+    setTimeout(() => {
+      setStatus({ message: '', type: '' })
+    }, 5000)
+  }
+
+
+  const getToken = async (channelName, uid) => {
+    try {
+      showStatus('Connecting to server...', 'info')
+      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelName, uid })
+      })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Server error' }))
+        throw new Error(errorData.error || `Server error: ${response.status}`)
+      }
+      const data = await response.json()
+      return data
+    } catch (error) {
+      showStatus('Error getting token', 'error')
+      throw error
+    }
+  }
+
+
+  const joinChannel = async () => {
+    if (!channelName || !uid) {
+      showStatus('Please enter channel name and user ID', 'error')
+      return
+    }
+    setIsLoading(true)
+    try {
+      showStatus('Getting token...', 'info')
+      const tokenData = await getToken(channelName, uid)
+      showStatus('Token received, joining channel...', 'info')
+
+      if (!clientRef.current) {
+        clientRef.current = window.AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+
+        clientRef.current.on("user-published", async (user, mediaType) => {
+          showStatus(`Remote user ${user.uid} joined with ${mediaType}`, 'info')
+          await clientRef.current.subscribe(user, mediaType)
+          if (mediaType === "video") {
+            const remoteVideoTrack = user.videoTrack
+            remoteVideoTrack.play(remoteVideoRef.current)
+            setRemoteUsers(prev => [...prev, { uid: user.uid, videoTrack: remoteVideoTrack }])
+            showStatus(`Remote video from user ${user.uid} is now playing`, 'success')
+          }
+          if (mediaType === "audio") {
+            const remoteAudioTrack = user.audioTrack
+            remoteAudioTrack.play()
+            showStatus(`Remote audio from user ${user.uid} is now playing`, 'success')
+          }
+        })
+
+        clientRef.current.on("user-unpublished", (user) => {
+          showStatus(`User ${user.uid} left the channel`, 'info')
+          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
+        })
+
+        clientRef.current.on("user-joined", (user) => {
+          showStatus(`User ${user.uid} joined the channel`, 'info')
+        })
+
+        clientRef.current.on("user-left", (user) => {
+          showStatus(`User ${user.uid} left the channel`, 'info')
+          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
+        })
+      }
+
+      try {
+        localTracksRef.current = await window.AgoraRTC.createMicrophoneAndCameraTracks()
+      } catch (trackError) {
+        showStatus("Camera/Microphone error: " + trackError.message, 'error')
+        throw trackError
+      }
+
+
+      if (localVideoRef.current && localTracksRef.current[1]) {
+        try {
+          localTracksRef.current[1].play(localVideoRef.current)
+          setLocalVideoLoaded(true)
+        } catch (error) {
+
+        }
+      }
+
+      await clientRef.current.join(tokenData.appId, channelName, tokenData.token, uid)
+      await clientRef.current.publish(localTracksRef.current)
+      setIsJoined(true)
+      showStatus(`Successfully joined video call: ${channelName} with UID: ${uid}`, 'success')
+    } catch (error) {
+      showStatus(`Error: ${error.message}`, 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  useEffect(() => {
+    if (isInCall && callType === "video" && !isJoined && !clientRef.current) {
+      joinChannel();
+    }
+  }, [isJoined, isInCall, callType]);
+
+
+
+  const leaveChannel = async () => {
+    try {
+      showStatus('Leaving channel...', 'info')
+      if (localTracksRef.current && localTracksRef.current.length > 0) {
+        for (let track of localTracksRef.current) {
+          if (track) {
+            try {
+              if (track.stop) track.stop()
+              if (track.close) track.close()
+              if (track.destroy) track.destroy()
+            } catch { }
+          }
+        }
+        localTracksRef.current = []
+      }
+      if (clientRef.current && isJoined) {
+        try {
+          await clientRef.current.leave()
+        } catch { }
+      }
+      if (clientRef.current) {
+        try {
+          clientRef.current.removeAllListeners()
+        } catch { }
+        clientRef.current = null
+      }
+      setIsJoined(false)
+      setIsInCall(false) 
+      setRemoteUsers([])
+      setLocalVideoLoaded(false)
+      showStatus('Left channel successfully', 'success')
+    } catch (error) {
+      showStatus(`Error leaving channel: ${error.message}`, 'error')
+      setIsJoined(false)
+      setIsInCall(false) 
+      setRemoteUsers([])
+      setLocalVideoLoaded(false)
+      clientRef.current = null
+      localTracksRef.current = []
+    }
+  }
+
+
+  const toggleLocalVideo = () => {
+    if (localTracksRef.current && localTracksRef.current[1]) {
+      localTracksRef.current[1].setEnabled(!localVideoEnabled)
+      setLocalVideoEnabled(!localVideoEnabled)
+      showStatus(`Local video ${!localVideoEnabled ? 'enabled' : 'disabled'}`, 'info')
+    }
+  }
+
+  // Toggle local audio
+  const toggleLocalAudio = () => {
+    if (localTracksRef.current && localTracksRef.current[0]) {
+      localTracksRef.current[0].setEnabled(!localAudioEnabled)
+      setLocalAudioEnabled(!localAudioEnabled)
+      showStatus(`Local audio ${!localAudioEnabled ? 'enabled' : 'disabled'}`, 'info')
+    }
+  }
+
+
   if (callType === "voice") {
     return (
       <VoiceCall
@@ -191,11 +377,23 @@ function CallApp() {
         channelName={channelName}
         uid={uid}
         onBack={endCall}
+        isJoined={isJoined}
+        joinChannel={joinChannel}
+        leaveChannel={leaveChannel}
+        isLoading={isLoading}
+        status={status}
+        localVideoRef={localVideoRef}
+        remoteVideoRef={remoteVideoRef}
+        localVideoLoaded={localVideoLoaded}
+        toggleLocalVideo={toggleLocalVideo}
+        localVideoEnabled={localVideoEnabled}
+        toggleLocalAudio={toggleLocalAudio}
+        localAudioEnabled={localAudioEnabled}
+        remoteUsers={remoteUsers}
       />
     );
   }
 
-  // 9️⃣ Render incoming call popup
   if (incomingCall) {
     return (
       <CallAlert acceptCall={acceptCall} rejectCall={rejectCall} incomingCall={incomingCall} />

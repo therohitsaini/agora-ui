@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import React, { Fragment, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,6 +9,7 @@ function SignIn() {
     const [forgetPassword, setForgetPassword] = useState(false);
     const [emailEmptyTrue, setEmailEmptyTrue] = useState(false);
     const [passwordEmptyTrue, setPasswordEmptyTrue] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const email = useRef("");
     const password = useRef("");
@@ -32,6 +33,7 @@ function SignIn() {
             setPasswordEmptyTrue(true);
             return;
         }
+        setIsLoading(true);
 
         try {
             const url = `${import.meta.env.VITE_BACK_END_URL}/api/auth/signin`;
@@ -61,6 +63,8 @@ function SignIn() {
         } catch (err) {
             console.error("sign in failed ...! ", err);
             toast.error("Server not reachable!");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -148,12 +152,17 @@ function SignIn() {
                                 fontSize: 14,
                                 p: 1,
                                 color: "white",
-                                bgcolor: "black",
+                                bgcolor:isLoading ? "#686262" : "black",
                                 border: "none",
                                 "&:hover": { bgcolor: "gray.800" },
                             }}
+                            disabled={isLoading} // disable while loading
                         >
-                            Sign in
+                            {isLoading ? (
+                                <CircularProgress size={20} sx={{ color: "white" }} />
+                            ) : (
+                                "Sign in"
+                            )}
                         </Button>
 
                         {/* Sign Up Link */}

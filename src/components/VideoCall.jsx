@@ -1,203 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FaVideo } from "react-icons/fa";
 
-function VideoCall({ channelName, uid, onBack }) {
+function VideoCall({ channelName, uid, onBack ,isJoined,isLoading,status,localVideoEnabled,localAudioEnabled,remoteUsers,localVideoLoaded,joinChannel,leaveChannel,toggleLocalVideo,toggleLocalAudio,localVideoRef,remoteVideoRef,}) {
   // State management
-  const [isJoined, setIsJoined] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [status, setStatus] = useState({ message: '', type: '' })
-  const [localVideoEnabled, setLocalVideoEnabled] = useState(true)
-  const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
-  const [remoteUsers, setRemoteUsers] = useState([])
-  const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
 
-  // Refs
-  const localVideoRef = useRef(null)
-  const remoteVideoRef = useRef(null)
-  const clientRef = useRef(null)
-  const localTracksRef = useRef([])
 
-  // Initialize Agora SDK
-  useEffect(() => {
-    const initAgora = async () => {
-      try {
-        if (!window.AgoraRTC) {
-          const script = document.createElement('script')
-          script.src = 'https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js'
-          script.onload = () => {
-            showStatus('Agora SDK loaded successfully', 'success')
-          }
-          document.head.appendChild(script)
-        }
-      } catch (error) {
-        showStatus('Error loading Agora SDK', 'error')
-      }
-    }
-    initAgora()
-  }, [])
 
-  // Show status message
-  const showStatus = (message, type) => {
-    setStatus({ message, type })
-    setTimeout(() => {
-      setStatus({ message: '', type: '' })
-    }, 5000)
-  }
-
-  // Get token from server
-  const getToken = async (channelName, uid) => {
-    try {
-      showStatus('Connecting to server...', 'info')
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelName, uid })
-      })
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Server error' }))
-        throw new Error(errorData.error || `Server error: ${response.status}`)
-      }
-      const data = await response.json()
-      return data
-    } catch (error) {
-      showStatus('Error getting token', 'error')
-      throw error
-    }
-  }
-
-  // Join channel
-  const joinChannel = async () => {
-    if (!channelName || !uid) {
-      showStatus('Please enter channel name and user ID', 'error')
-      return
-    }
-    setIsLoading(true)
-    try {
-      showStatus('Getting token...', 'info')
-      const tokenData = await getToken(channelName, uid)
-      showStatus('Token received, joining channel...', 'info')
-
-      if (!clientRef.current) {
-        clientRef.current = window.AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-
-        clientRef.current.on("user-published", async (user, mediaType) => {
-          showStatus(`Remote user ${user.uid} joined with ${mediaType}`, 'info')
-          await clientRef.current.subscribe(user, mediaType)
-          if (mediaType === "video") {
-            const remoteVideoTrack = user.videoTrack
-            remoteVideoTrack.play(remoteVideoRef.current)
-            setRemoteUsers(prev => [...prev, { uid: user.uid, videoTrack: remoteVideoTrack }])
-            showStatus(`Remote video from user ${user.uid} is now playing`, 'success')
-          }
-          if (mediaType === "audio") {
-            const remoteAudioTrack = user.audioTrack
-            remoteAudioTrack.play()
-            showStatus(`Remote audio from user ${user.uid} is now playing`, 'success')
-          }
-        })
-
-        clientRef.current.on("user-unpublished", (user) => {
-          showStatus(`User ${user.uid} left the channel`, 'info')
-          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
-        })
-
-        clientRef.current.on("user-joined", (user) => {
-          showStatus(`User ${user.uid} joined the channel`, 'info')
-        })
-
-        clientRef.current.on("user-left", (user) => {
-          showStatus(`User ${user.uid} left the channel`, 'info')
-          setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid))
-        })
-      }
-
-      // Create local tracks
-      try {
-        localTracksRef.current = await window.AgoraRTC.createMicrophoneAndCameraTracks()
-      } catch (trackError) {
-        showStatus("Camera/Microphone error: " + trackError.message, 'error')
-        throw trackError
-      }
-
-      // Play local video
-      if (localVideoRef.current && localTracksRef.current[1]) {
-        try {
-          localTracksRef.current[1].play(localVideoRef.current)
-          setLocalVideoLoaded(true)
-        } catch (error) {
-          // ignore
-        }
-      }
-
-      await clientRef.current.join(tokenData.appId, channelName, tokenData.token, uid)
-      await clientRef.current.publish(localTracksRef.current)
-      setIsJoined(true)
-      showStatus(`Successfully joined video call: ${channelName} with UID: ${uid}`, 'success')
-    } catch (error) {
-      showStatus(`Error: ${error.message}`, 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Leave channel
-  const leaveChannel = async () => {
-    try {
-      showStatus('Leaving channel...', 'info')
-      if (localTracksRef.current && localTracksRef.current.length > 0) {
-        for (let track of localTracksRef.current) {
-          if (track) {
-            try {
-              if (track.stop) track.stop()
-              if (track.close) track.close()
-              if (track.destroy) track.destroy()
-            } catch { }
-          }
-        }
-        localTracksRef.current = []
-      }
-      if (clientRef.current && isJoined) {
-        try {
-          await clientRef.current.leave()
-        } catch { }
-      }
-      if (clientRef.current) {
-        try {
-          clientRef.current.removeAllListeners()
-        } catch { }
-        clientRef.current = null
-      }
-      setIsJoined(false)
-      setRemoteUsers([])
-      setLocalVideoLoaded(false)
-      showStatus('Left channel successfully', 'success')
-    } catch (error) {
-      showStatus(`Error leaving channel: ${error.message}`, 'error')
-      setIsJoined(false)
-      setRemoteUsers([])
-      setLocalVideoLoaded(false)
-      clientRef.current = null
-      localTracksRef.current = []
-    }
-  }
-
-  // Toggle local video
-  const toggleLocalVideo = () => {
-    if (localTracksRef.current && localTracksRef.current[1]) {
-      localTracksRef.current[1].setEnabled(!localVideoEnabled)
-      setLocalVideoEnabled(!localVideoEnabled)
-      showStatus(`Local video ${!localVideoEnabled ? 'enabled' : 'disabled'}`, 'info')
-    }
-  }
-
-  // Toggle local audio
-  const toggleLocalAudio = () => {
-    if (localTracksRef.current && localTracksRef.current[0]) {
-      localTracksRef.current[0].setEnabled(!localAudioEnabled)
-      setLocalAudioEnabled(!localAudioEnabled)
-      showStatus(`Local audio ${!localAudioEnabled ? 'enabled' : 'disabled'}`, 'info')
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -238,7 +46,7 @@ function VideoCall({ channelName, uid, onBack }) {
               </div>
             </div>
             <div className="space-y-3">
-              <button
+              {/* <button
                 onClick={joinChannel}
                 disabled={isLoading}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
@@ -254,7 +62,7 @@ function VideoCall({ channelName, uid, onBack }) {
                     Join Video Call
                   </>
                 )}
-              </button>
+              </button> */}
               <button
                 onClick={onBack}
                 className="w-full px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center justify-center gap-2"
@@ -317,7 +125,7 @@ function VideoCall({ channelName, uid, onBack }) {
                 autoPlay
                 muted
                 playsInline
-                style={{ backgroundColor: '#374151' }}
+             
               />
               {/* Remote Video */}
               <video
@@ -328,7 +136,7 @@ function VideoCall({ channelName, uid, onBack }) {
               />
             </div>
 
-            {/* Right Sidebar (Participants, Chat, etc.) */}
+        
             <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
               {/* Participants Tab */}
               <div className="p-4 border-b border-gray-200">

@@ -11,6 +11,7 @@ function SignUp() {
     const [passwordReq, setPassword] = useState(false)
     const [massageReq, setMassageReq] = useState("")
     const [usernameReq, setUsernameReq] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
 
 
@@ -50,6 +51,7 @@ function SignUp() {
             setPassword(true)
             return false
         }
+        setIsLoading(true)
 
         try {
             const url = `${import.meta.env.VITE_BACK_END_URL}/api/auth/signup`
@@ -69,12 +71,12 @@ function SignUp() {
             console.log(response)
         } catch (err) {
             console.log(err)
+        } finally {
+            setIsLoading(false)
         }
-
-        // setSignUpForm(object)
     }
 
-    // console.log("signUpFrom", signUpFrom)
+
 
 
     return (
@@ -110,7 +112,23 @@ function SignUp() {
                             </label>
                             <span className='text-[12px] duration-700 text-red-400 font-semibold'>{massageReq}</span>
                         </div>
-                        <Button onClick={signUpFromHandler} variant="outlined" sx={{ fontSize: 14, p: 1, color: 'white', bgcolor: 'black', border: 'none' }}>Sign up</Button>
+                        <Button
+                            onClick={signUpFromHandler}
+                            variant="outlined"
+                            sx={{
+                                fontSize: 14,
+                                p: 1,
+                                color: 'white',
+                                bgcolor: isLoading ? "#686262" : "black",
+                                border: 'none'
+                            }}
+                        >
+                            {
+                                isLoading ? <CircularProgress size={20} sx={{ color: "white" }} /> : "Sign up"
+
+                            }
+
+                        </Button>
 
                         <div className=' flex gap-2 font-semibold justify-end'>
                             <p className=' underline'>If you have an account ?</p>
