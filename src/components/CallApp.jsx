@@ -314,6 +314,15 @@ function CallApp() {
     }
   }, [isJoined, isInCall, callType]);
 
+
+
+
+  if (localVideoRef.current && localTracksRef.current[1]) {
+    localTracksRef.current[1].play(localVideoRef.current);
+    console.log("Local video track played:", localVideoRef.current);
+  }
+
+
   const leaveChannel = async () => {
     try {
       showStatus('Leaving channel...', 'info')

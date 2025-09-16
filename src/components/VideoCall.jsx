@@ -20,6 +20,8 @@ function VideoCall({
   remoteVideoRef,
 }) {
 
+  console.log("localVideoRef", localVideoRef);
+
   return (
     <div className="min-h-screen bg-gray-100">
       {!isJoined && (
