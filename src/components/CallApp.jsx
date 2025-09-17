@@ -441,28 +441,28 @@ function CallApp() {
 
   }
 
-  // const getUserByID = async (id) => {
+  const getUserByID = async (id) => {
 
-  //   try {
-  //     const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
-  //     const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
-  //     const data = fetchData.json();
-  //     console.log("User by ID:", data);
-  //     if (fetchData.ok) return data;
-  //     return null;
+    try {
+      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
+      const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+      const data = await fetchData.json();
+      console.log("User by ID:", data);
+      if (fetchData.ok) return data;
+      return null;
 
-  //   } catch (error) {
-  //     console.log("Error fetching user by ID:", error);
-  //     return null;
-  //   }
-  // }
-  // useEffect(() => {
-  //   const id = localStorage.getItem("user-ID");
-  //   if (id) {
-  //     const u = getUserByID(id);
-  //     console.log("Logged in user:", u);
-  //   }
-  // })
+    } catch (error) {
+      console.log("Error fetching user by ID:", error);
+      return null;
+    }
+  }
+  useEffect(() => {
+    const id = localStorage.getItem("user-ID");
+    if (id) {
+      const u = getUserByID(id);
+      console.log("Logged in user:", u);
+    }
+  })
 
 
 
@@ -475,7 +475,7 @@ function CallApp() {
           display: "flex",
           alignItems: "end",
           flexDirection: "column",
-         backgroundColor: "rgba(0,0,0,0.4)",
+          backgroundColor: "rgba(0,0,0,0.4)",
           // // backgroundImage: `url(${bgImage})`,
           // backgroundSize: "cover",
           // backgroundPosition: "center",
