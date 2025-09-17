@@ -7,7 +7,7 @@ export default function AnimatedHero({ children }) {
             initial={{ backgroundPosition: "0% 0%" }}
             animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
             transition={{
-                duration: 10,
+                duration: 50,
                 repeat: Infinity,
                 repeatType: "reverse",
             }}
@@ -25,7 +25,7 @@ export default function AnimatedHero({ children }) {
                 initial={{ backgroundPosition: "0% 0%" }}
                 animate={{ backgroundPosition: ["0% 0%", "200% 200%"] }}
                 transition={{
-                    duration: 60,
+                    duration: 80,
                     repeat: Infinity,
                     repeatType: "loop",
                 }}
