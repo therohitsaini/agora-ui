@@ -56,7 +56,9 @@ function CallApp() {
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
-    const s = io(backendUrl);
+    const s = io(backendUrl, {
+      transports: ["websocket"], 
+    });
     setSocket(s);
     s.emit('register', myUserId);
     s.on('incoming-call', (callData) => {
@@ -441,28 +443,28 @@ function CallApp() {
 
   }
 
-  const getUserByID = async (id) => {
+  // const getUserByID = async (id) => {
 
-    try {
-      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
-      const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
-      const data = await fetchData.json();
-      console.log("User by ID:", data);
-      if (fetchData.ok) return data;
-      return null;
+  //   try {
+  //     const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
+  //     const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+  //     const data = await fetchData.json();
+  //     console.log("User by ID:", data);
+  //     if (fetchData.ok) return data;
+  //     return null;
 
-    } catch (error) {
-      console.log("Error fetching user by ID:", error);
-      return null;
-    }
-  }
-  useEffect(() => {
-    const id = localStorage.getItem("user-ID");
-    if (id) {
-      const u = getUserByID(id);
-      console.log("Logged in user:", u);
-    }
-  })
+  //   } catch (error) {
+  //     console.log("Error fetching user by ID:", error);
+  //     return null;
+  //   }
+  // }
+  // useEffect(() => {
+  //   const id = localStorage.getItem("user-ID");
+  //   if (id) {
+  //     const u = getUserByID(id);
+  //     console.log("Logged in user:", u);
+  //   }
+  // })
 
 
 
