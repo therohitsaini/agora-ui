@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import VoiceCall from "./VoiceCall";
 import VideoCall from "./VideoCall";
 import { IoCallOutline } from "react-icons/io5";
@@ -19,6 +19,9 @@ import {
   Avatar,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
+import bgImage from "../assets/image/agoraBG.jpg";
+import AnimatedHero from "./AnimatedHero";
 
 function CallApp() {
   const [socket, setSocket] = useState(null);
@@ -438,176 +441,232 @@ function CallApp() {
 
   }
 
+  const getUserByID = async (id) => {
+
+    try {
+      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
+      const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+      const data = fetchData.json();
+      console.log("User by ID:", data);
+      if (fetchData.ok) return data;
+      return null;
+
+    } catch (error) {
+      console.log("Error fetching user by ID:", error);
+      return null;
+    }
+  }
+  useEffect(() => {
+    const id = localStorage.getItem("user-ID");
+    if (id) {
+      const u = getUserByID(id);
+      console.log("Logged in user:", u);
+    }
+  })
+
+
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        p: 4,
-        background: "linear-gradient(to bottom right, #eff6ff, #e0e7ff)",
-      }} >
-      <Card
+    <AnimatedHero>
+      <Box
         sx={{
-          borderRadius: 4,
-          boxShadow: 6,
-          border: "2px solid #d1d5db",
-          width: 700,
+          minHeight: "100vh",
+          width: "100%",
+          display: "flex",
+          alignItems: "end",
+          flexDirection: "column",
+         backgroundColor: "rgba(0,0,0,0.4)",
+          // // backgroundImage: `url(${bgImage})`,
+          // backgroundSize: "cover",
+          // backgroundPosition: "center",
+
         }}
       >
 
-        <Box
-          sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}
-        >
-          <Button
-            onClick={logOutButton}
-            sx={{ fontWeight: "bold", color: "error.main", textDecoration: "underline" }}
-          >
-            Log Out
-          </Button>
-        </Box>
+        <Navbar logOutButton={logOutButton} />
 
-
-        <CardContent sx={{ textAlign: "center", pt: 2 }}>
-          <Avatar
+        <div className=" w-full min-h-[85vh]  flex  items-center justify-center px-20 ">
+          <Box
             sx={{
-              width: 80,
-              height: 80,
-              mb: 3,
-              mx: "auto",
-              background: "linear-gradient(to bottom right, #2563eb, #7c3aed)",
+              width: "100%",
+              textAlign: "start",
+              px: 3,
+
             }}
+
           >
-            <IoCallOutline size={30} />
-          </Avatar>
-          <Typography variant="h4" fontWeight="bold" color="text.primary" gutterBottom>
-            Agora Call App
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Choose your call type to start
-          </Typography>
-        </CardContent>
-
-
-        <CardContent sx={{ p: 4, py: 0 }}>
-          <Box sx={{ mb: 5 }}>
-            <Box sx={{ mb: 3 }}>
-              <InputLabel shrink>Channel Name</InputLabel>
-              <TextField
-                fullWidth
-                size="small"
-                value={channelName}
-                onChange={(e) => setChannelName(e.target.value)}
-                placeholder="Enter channel name"
-                variant="outlined"
-                sx={{ mt: 1 }}
-              />
-            </Box>
-
-            <Box>
-              <FormControl fullWidth size="small" >
-                <InputLabel>Select User</InputLabel>
-                <Select
-                  value={uid}
-                  onChange={(e) => setUid(e.target.value)}
-                  label="Select User"
-                >
-                  <MenuItem value="">
-                    -- Select a user --
-                  </MenuItem>
-                  {user.map((u) => (
-                    <MenuItem key={u._id} value={u._id}>
-                      {u.fullname}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-
-
-          <Box sx={{ display: "flex", gap: 3 }}>
-            <Button
-              fullWidth
-              onClick={() => startCall(uid, "voice")}
+            <Typography
+              variant="h4"
+              fontWeight="bold"
+              textAlign="start"
               sx={{
-
-                background: "linear-gradient(to right, #22c55e, #16a34a)",
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontWeight: "bold",
-                boxShadow: 4,
-                "&:hover": {
-                  background: "linear-gradient(to right, #16a34a, #15803d)",
-                  transform: "translateY(-2px)",
-                  boxShadow: 6,
-                },
+                fontSize: "42px",
+                background: "linear-gradient(90deg, #f9f9fa, #939494, #4b4b4b)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              <Avatar
-                sx={{
-                  bgcolor: "rgba(253, 250, 250, 0.2)",
-                  mr: 2,
-                  width: 40,
-                  height: 40,
-                }}
-              >
-                <IoCallOutline size={20} color="#ffffff" />
-              </Avatar>
-              <Box textAlign="left">
-                <Typography variant="subtitle1" fontWeight="600">
-                  Voice Call
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Audio only - No video
-                </Typography>
-              </Box>
-            </Button>
+              Video calls with anyone anytime
+            </Typography>
 
-            <Button
-              fullWidth
-              onClick={() => startCall(uid, "video")}
+            <Typography variant="body1" color="white" textAlign="start" sx={{ mt: 1 }}>
+              Select a user and choose call type to start
+            </Typography>
+          </Box>
+          <Box sx={{
+            // background: "#504e4e",
+            marginTop: 5,
+            borderRadius: 4,
+            backgroundColor: "rgba(92, 89, 89, 0.374)",
+            width: "100%",
+
+          }}>
+            <Card
               sx={{
+                background: "transparent", boxShadow: "none",
 
-                background: "linear-gradient(to right, #3b82f6, #2563eb)",
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontWeight: "bold",
-
-                "&:hover": {
-                  background: "linear-gradient(to right, #2563eb, #1d4ed8)",
-                  transform: "translateY(-2px)",
-                  boxShadow: 6,
-                },
               }}
             >
-              <Avatar
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  mr: 2,
-                  width: 40,
-                  height: 40,
-                }}
+              <Box
+                sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}
               >
-                <FaVideo size={20} color="#feffff" />
-              </Avatar>
-              <Box textAlign="left">
-                <Typography variant="subtitle1" fontWeight="600">
-                  Video Call
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Audio + Video
-                </Typography>
               </Box>
-            </Button>
+              <CardContent
+                sx={{
+                  p: 4,
+                  py: 0,
+                }}>
+                <Box sx={{ mb: 5 }}>
+                  <Box sx={{ mb: 3 }}>
+                    <InputLabel sx={{
+                      color: "#ffffff",
+                    }} shrink>Channel Name</InputLabel>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={channelName}
+                      onChange={(e) => setChannelName(e.target.value)}
+                      placeholder="Enter channel name"
+                      variant="outlined"
+
+                      sx={{
+                        mt: 1,
+                        input: {
+                          color: "white", // text color
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "white", // label color
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <FormControl fullWidth size="small" >
+                      <InputLabel>Select User</InputLabel>
+                      <Select
+                        value={uid}
+                        onChange={(e) => setUid(e.target.value)}
+                        label="Select User"
+                      >
+                        <MenuItem value="">
+                          -- Select a user --
+                        </MenuItem>
+                        {user.map((u) => (
+                          <MenuItem key={u._id} value={u._id}>
+                            {u.fullname}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+
+
+                <Box sx={{ display: "flex", gap: 3 }}>
+                  <Button
+                    fullWidth
+                    onClick={() => startCall(uid, "voice")}
+                    sx={{
+
+                      background: "linear-gradient(to right, #22c55e, #16a34a)",
+                      color: "white",
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: "bold",
+                      boxShadow: 4,
+                      "&:hover": {
+                        background: "linear-gradient(to right, #16a34a, #15803d)",
+                        transform: "translateY(-2px)",
+                        boxShadow: 6,
+                      },
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: "rgba(253, 250, 250, 0.2)",
+                        mr: 2,
+                        width: 40,
+                        height: 40,
+                      }}
+                    >
+                      <IoCallOutline size={20} color="#ffffff" />
+                    </Avatar>
+                    <Box textAlign="left">
+                      <Typography variant="subtitle1" fontWeight="600">
+                        Voice Call
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                        Audio only - No video
+                      </Typography>
+                    </Box>
+                  </Button>
+
+                  <Button
+                    fullWidth
+                    onClick={() => startCall(uid, "video")}
+                    sx={{
+
+                      background: "linear-gradient(to right, #3b82f6, #2563eb)",
+                      color: "white",
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: "bold",
+
+                      "&:hover": {
+                        background: "linear-gradient(to right, #2563eb, #1d4ed8)",
+                        transform: "translateY(-2px)",
+                        boxShadow: 6,
+                      },
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.2)",
+                        mr: 2,
+                        width: 40,
+                        height: 40,
+                      }}
+                    >
+                      <FaVideo size={20} color="#feffff" />
+                    </Avatar>
+                    <Box textAlign="left">
+                      <Typography variant="subtitle1" fontWeight="600">
+                        Video Call
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                        Audio + Video
+                      </Typography>
+                    </Box>
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
           </Box>
-        </CardContent>
-      </Card>
-    </Box>
+        </div>
+      </Box >
+    </AnimatedHero>
   );
 }
 
