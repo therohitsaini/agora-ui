@@ -22,6 +22,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import bgImage from "../assets/image/agoraBG.jpg";
 import AnimatedHero from "./AnimatedHero";
+import { toast, ToastContainer } from "react-toastify";
+import InsuficientBalanceAlert from "../AlertModal/InsuficientBalanceAlert";
 
 function CallApp() {
   const [socket, setSocket] = useState(null);
@@ -38,7 +40,7 @@ function CallApp() {
   const [localAudioEnabled, setLocalAudioEnabled] = useState(true)
   const [remoteUsers, setRemoteUsers] = useState([])
   const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
-  const [joined, setJoined] = useState(false)
+  const [open, setOpen] = useState(false);
 
 
 
@@ -46,51 +48,45 @@ function CallApp() {
   const remoteVideoRef = useRef(null)
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
-
   const navigator = useNavigate();
-
-
-
   const myUserId = localStorage.getItem("user-ID");
-
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
     const s = io(backendUrl, {
-      transports: ["websocket"], 
+      transports: ["websocket"],
     });
     setSocket(s);
     s.emit('register', myUserId);
+
     s.on('incoming-call', (callData) => {
-      console.log('📞 Incoming call:', callData);
       setIncomingCall(callData);
     });
 
     s.on('call-accepted', (callData) => {
-      console.log('✅ Call accepted:', callData);
-
-
       const receiverUser = user.find(u => u._id === callData.fromUid);
       const receiverAgoraUid = receiverUser?.agoraUid || callData.fromUid;
-
       setUid(receiverAgoraUid);
       setCallType(callData.type);
       setChannelName(callData.channelName);
       setIsInCall(true);
       setIncomingCall(null);
-
-      console.log('✅ Setting agoraUid for call:', receiverAgoraUid);
-      console.log('✅ Call screen should open now!');
     });
 
     s.on('call-rejected', (callData) => {
       console.log('❌ Call rejected:', callData);
       setIncomingCall(null);
-      alert('Call rejected');
+      toast.error("Call rejected by user");
+    });
+    s.on('call-failed', (data) => {
+      console.log('❌ Call failed:', data);
+      // alert(data.message);
+      setOpen(true);
+      setIncomingCall(null);
     });
 
     s.on('call-ended', (callData) => {
-      console.log('📞 Call ended:', callData);
+      toast.info("Call ended");
       setCallType(null);
       setIsInCall(false);
       setIncomingCall(null);
@@ -103,7 +99,7 @@ function CallApp() {
 
   const startCall = (toUid, type = 'voice') => {
     if (!socket || !toUid) {
-      alert("Please select a user to call");
+      toast.error("Please select a user to call");
       return;
     }
 
@@ -121,15 +117,11 @@ function CallApp() {
       channelName: callChannelName
     });
 
-    console.log(` Starting ${type} call to ${toUid}`);
   };
 
 
   const acceptCall = () => {
-    console.log(' Accept call clicked!', { socket: !!socket, incomingCall });
-
     if (socket && incomingCall) {
-
       const callerUser = user.find(u => u._id === incomingCall.fromUid);
       const callerAgoraUid = callerUser?.agoraUid || incomingCall.fromUid;
       setUid(callerAgoraUid);
@@ -142,13 +134,10 @@ function CallApp() {
         type: incomingCall.type,
         channelName: incomingCall.channelName
       });
-
-
     } else {
       console.log(' Missing socket or incomingCall:', { socket: !!socket, incomingCall });
     }
   };
-
 
   const rejectCall = () => {
     if (socket && incomingCall) {
@@ -223,9 +212,9 @@ function CallApp() {
   const getToken = async (channelName, uid) => {
     try {
       showStatus('Connecting to server...', 'info')
-      const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const url = `${import.meta.env.VITE_BACK_END_URL}/api/video-call/generate-token`
+      const response = await fetch(url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channelName, uid })
       })
       if (!response.ok) {
@@ -313,11 +302,17 @@ function CallApp() {
       setIsLoading(false)
     }
   }
+  // useEffect(() => {
+  //   if (isInCall && callType === "video" && !isJoined && !clientRef.current) {
+  //     joinChannel();
+  //   }
+  // }, [isJoined, isInCall, callType]);
   useEffect(() => {
-    if (isInCall && callType === "video" && !isJoined && !clientRef.current) {
+    if (isInCall && callType === "video" && !isJoined) {
       joinChannel();
     }
-  }, [isJoined, isInCall, callType]);
+  }, [isInCall, callType]);
+
 
 
 
@@ -470,6 +465,8 @@ function CallApp() {
 
   return (
     <AnimatedHero>
+      <ToastContainer />
+      <InsuficientBalanceAlert open={open} onClose={() => setOpen(false)} />
       <Box
         sx={{
           minHeight: "100vh",
@@ -478,15 +475,9 @@ function CallApp() {
           alignItems: "end",
           flexDirection: "column",
           backgroundColor: "rgba(0,0,0,0.4)",
-          // // backgroundImage: `url(${bgImage})`,
-          // backgroundSize: "cover",
-          // backgroundPosition: "center",
-
         }}
       >
-
         <Navbar logOutButton={logOutButton} />
-
         <div className=" w-full min-h-[85vh]  flex  items-center justify-center px-20 ">
           <Box
             sx={{
@@ -495,7 +486,6 @@ function CallApp() {
               px: 3,
 
             }}
-
           >
             <Typography
               variant="h4"
