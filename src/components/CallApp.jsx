@@ -24,6 +24,7 @@ import bgImage from "../assets/image/agoraBG.jpg";
 import AnimatedHero from "./AnimatedHero";
 import { toast, ToastContainer } from "react-toastify";
 import InsuficientBalanceAlert from "../AlertModal/InsuficientBalanceAlert";
+import GoogleAnimatedButton from "../io/Io";
 
 function CallApp() {
   const [socket, setSocket] = useState(null);
@@ -41,14 +42,20 @@ function CallApp() {
   const [remoteUsers, setRemoteUsers] = useState([])
   const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
   const [open, setOpen] = useState(false);
-
-
+  const [userId, seUserId] = useState("");
 
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
   const navigator = useNavigate();
+
+  useEffect(() => {
+    const id = localStorage.getItem("user-ID");
+    seUserId(id);
+  }, []);
+
+  console.log("Logged in user ID:____CURRENT", userId);
   const myUserId = localStorage.getItem("user-ID");
 
   useEffect(() => {
@@ -461,6 +468,39 @@ function CallApp() {
   //   }
   // })
 
+  const handleRecharge = async () => {
+    const url = `${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/create-order`
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amountINR: 1, userId })
+    });
+    const data = await res.json();
+    const order = data.order;   // 👈 yaha se actual order nikalo
+
+    console.log("TEXT", order)
+    // if()
+    const options = {
+      key: "rzp_test_RJ31PhSmp5nbLQ", // test key_id
+      amount: order?.amount,
+      currency: order?.currency,
+      name: "My Calling App",
+      description: "Wallet Recharge",
+      order_id: order?.id,
+      handler: async function (response) {
+
+        await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/verify-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...response, userId, amountINR: 1 })
+        });
+        alert("Recharge Success! Refresh wallet balance.");
+      },
+      // prefill: { name: currentUser?.name, email: currentUser?.email, contact: "9999999999" }
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
 
 
   return (
@@ -477,7 +517,7 @@ function CallApp() {
           backgroundColor: "rgba(0,0,0,0.4)",
         }}
       >
-        <Navbar logOutButton={logOutButton} />
+        <Navbar logOutButton={logOutButton} handleRecharge={handleRecharge} />
         <div className=" w-full min-h-[85vh]  flex  items-center justify-center px-20 ">
           <Box
             sx={{
@@ -505,6 +545,17 @@ function CallApp() {
             <Typography variant="body1" color="white" textAlign="start" sx={{ mt: 1 }}>
               Select a user and choose call type to start
             </Typography>
+            <Button sx={{
+              textTransform: "none",
+              marginTop: 2,
+              p: "10px",
+              paddingX: " 20px",
+              color: "black",
+              fontVariant: "small-caps",
+              backgroundColor: "white",
+              fontWeight: "bold"
+            }}
+              variant="contained" >Let's Connect Some One  </Button>
           </Box>
           <Box sx={{
             // background: "#504e4e",
@@ -545,10 +596,10 @@ function CallApp() {
                       sx={{
                         mt: 1,
                         input: {
-                          color: "white", // text color
+                          color: "white",
                         },
                         "& .MuiInputLabel-root": {
-                          color: "white", // label color
+                          color: "white",
                         },
                       }}
                     />

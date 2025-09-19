@@ -61,7 +61,7 @@ function VideoCall({
               </div>
             </div>
             <div className="space-y-3">
-              {/* <button
+              <button
                 onClick={joinChannel}
                 disabled={isLoading}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
@@ -77,7 +77,7 @@ function VideoCall({
                     Join Video Call
                   </>
                 )}
-              </button> */}
+              </button>
               <button
                 onClick={onBack}
                 className="w-full px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center justify-center gap-2"

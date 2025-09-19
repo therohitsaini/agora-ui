@@ -10,7 +10,10 @@ import CallIcon from "@mui/icons-material/Call";
 import { Chip, Paper } from "@mui/material";
 import navLogo from "../assets/image/call-center.png"
 
-function Navbar({ balance, logOutButton }) {
+function Navbar({ balance, logOutButton, handleRecharge }) {
+
+
+
 
     return (
         <AppBar position="static"
@@ -33,7 +36,7 @@ function Navbar({ balance, logOutButton }) {
                         fontWeight: "bold"
                     }}
                 >
-                  
+
                 </Typography>
 
                 <Box
@@ -79,7 +82,7 @@ function Navbar({ balance, logOutButton }) {
                                 Wallet Balance
                             </Typography>
                             <Typography variant="body1" sx={{ fontSize: "12px", fontWeight: "bold", color: "#9fa1a2a9" }}>
-                                ${10}.00 Credits
+                                INR: {10}.00 Credits
                             </Typography>
                         </Box>
 
@@ -103,7 +106,7 @@ function Navbar({ balance, logOutButton }) {
                                     letterSpacing: "0.5px",
                                 },
                             }}
-                            onClick={() => alert("Add credits clicked!")}
+                            onClick={() => handleRecharge()}
                         />
 
                     </Paper>
