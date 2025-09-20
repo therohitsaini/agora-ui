@@ -6,7 +6,8 @@ import CallApp from './components/CallApp'
 import SignIn from './Auth/SignIn'
 import SignUp from './Auth/SignUp'
 import CallNotification from './components/CallNotification'
-import Demo from './components/demo'
+// import Demo from './components/demo'
+
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/callapp" element={<CallApp />} />
           <Route path="/callnotification" element={<CallNotification />} />
-          <Route path="/vc-call" element={<Demo/>} />
+          {/* <Route path="/vc-call" element={<Demo/>} /> */}
         </Routes>
       </BrowserRouter>
     </Fragment>
