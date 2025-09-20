@@ -1,3 +1,4 @@
+import { Box, CircularProgress } from '@mui/material';
 import React, { useState, useEffect, useRef } from 'react'
 import { FaVideo } from "react-icons/fa";
 
@@ -18,13 +19,14 @@ function VideoCall({
   toggleLocalAudio,
   localVideoRef,
   remoteVideoRef,
+  time,
+  formatTime
 }) {
 
-  console.log("localVideoRef", localVideoRef);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {!isJoined && (
+      {/* {!isJoined && (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
             <div className="text-center mb-8">
@@ -96,9 +98,28 @@ function VideoCall({
             )}
           </div>
         </div>
-      )}
+      )} */}
+      {
+        !isJoined
+        &&
+        (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                width: "100%",
+              }}
+            >
+              <CircularProgress size={60} thickness={5} />
+            </Box>
+          </div>
+        )
+      }
 
-      {/* Main Meeting Interface */}
+
       {isJoined && (
         <div className="h-screen flex flex-col bg-gray-900">
           {/* Top Header */}
@@ -129,7 +150,7 @@ function VideoCall({
             </div>
           </div>
 
-          {/* Main Content Area */}
+       
           <div className="flex-1 flex">
             {/* Main Video Area: Side by Side */}
             <div className="flex-1 flex flex-row items-center justify-center bg-gray-800">
@@ -168,6 +189,7 @@ function VideoCall({
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-800">You (UID: {uid})</p>
                       <p className="text-xs text-gray-500">Host</p>
+                      <span>{formatTime(time)}</span>
                     </div>
                     <div className="flex space-x-1">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${localAudioEnabled ? 'bg-green-100' : 'bg-red-100'

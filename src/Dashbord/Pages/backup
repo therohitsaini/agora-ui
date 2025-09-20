@@ -660,3 +660,21 @@ function VideoCall({ channelName, uid, onBack }) {
 }
 
 export default VideoCall
+
+
+
+
+  // <Demo
+  //         channelName={channelName}
+  //         localVideoRef={localVideoRef}
+  //         remoteVideoRef={remoteVideoRef}
+  //         remoteUsers={remoteUsers}
+  //         uid={uid}
+  //         formatTime={formatTime}
+  //         time={time}
+  //         localAudioEnabled={localAudioEnabled}
+  //         localVideoEnabled={localVideoEnabled}
+  //         toggleLocalAudio={toggleLocalAudio}
+  //         toggleLocalVideo={toggleLocalVideo}
+  //         leaveChannel={leaveChannel}
+  //       />

@@ -43,6 +43,9 @@ function CallApp() {
   const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
   const [open, setOpen] = useState(false);
   const [userId, seUserId] = useState("");
+  const [userInfoByID, setUserInfoByID] = useState({})
+  const [time, setTime] = useState(0);
+  const intervalRef = useRef(null);
 
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
@@ -55,7 +58,6 @@ function CallApp() {
     seUserId(id);
   }, []);
 
-  console.log("Logged in user ID:____CURRENT", userId);
   const myUserId = localStorage.getItem("user-ID");
 
   useEffect(() => {
@@ -81,12 +83,12 @@ function CallApp() {
     });
 
     s.on('call-rejected', (callData) => {
-      console.log('❌ Call rejected:', callData);
+      console.log(' Call rejected:', callData);
       setIncomingCall(null);
       toast.error("Call rejected by user");
     });
     s.on('call-failed', (data) => {
-      console.log('❌ Call failed:', data);
+      console.log(' Call failed:', data);
       // alert(data.message);
       setOpen(true);
       setIncomingCall(null);
@@ -329,6 +331,29 @@ function CallApp() {
     console.log("Local video track played:", localVideoRef.current);
   }
 
+  const getUserByID = async (id) => {
+
+    try {
+      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/${id}`;
+      const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
+      const { data } = await fetchData.json();
+      if (fetchData.ok) {
+        setUserInfoByID(data)
+      }
+
+    } catch (error) {
+      console.log("Error fetching user by ID:", error);
+      return null;
+    }
+  }
+  useEffect(() => {
+    const id = localStorage.getItem("user-ID");
+    if (id) {
+      const u = getUserByID(id);
+
+    }
+  }, [])
+
 
   const leaveChannel = async () => {
     try {
@@ -390,6 +415,25 @@ function CallApp() {
     }
   }
 
+  // useEffect(() => {
+  //   if (isJoined) {
+  //     intervalRef.current = setInterval(() => {
+  //       setTime(prev => prev + 1);
+  //     }, 1000);
+  //   } else {
+  //     clearInterval(intervalRef.current);
+  //   }
+
+  //   return () => clearInterval(intervalRef.current);
+  // }, [isJoined,]);
+
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
+
 
   if (callType === "voice") {
     return (
@@ -423,6 +467,8 @@ function CallApp() {
         toggleLocalAudio={toggleLocalAudio}
         localAudioEnabled={localAudioEnabled}
         remoteUsers={remoteUsers}
+        formatTime={formatTime}
+        time={time}
       />
     );
   }
@@ -445,28 +491,7 @@ function CallApp() {
 
   }
 
-  // const getUserByID = async (id) => {
 
-  //   try {
-  //     const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-id/${id}`;
-  //     const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
-  //     const data = await fetchData.json();
-  //     console.log("User by ID:", data);
-  //     if (fetchData.ok) return data;
-  //     return null;
-
-  //   } catch (error) {
-  //     console.log("Error fetching user by ID:", error);
-  //     return null;
-  //   }
-  // }
-  // useEffect(() => {
-  //   const id = localStorage.getItem("user-ID");
-  //   if (id) {
-  //     const u = getUserByID(id);
-  //     console.log("Logged in user:", u);
-  //   }
-  // })
 
   const handleRecharge = async () => {
     const url = `${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/create-order`
@@ -517,7 +542,7 @@ function CallApp() {
           backgroundColor: "rgba(0,0,0,0.4)",
         }}
       >
-        <Navbar logOutButton={logOutButton} handleRecharge={handleRecharge} />
+        <Navbar logOutButton={logOutButton} handleRecharge={handleRecharge} userInfoByID={userInfoByID} />
         <div className=" w-full min-h-[85vh]  flex  items-center justify-center px-20 ">
           <Box
             sx={{
@@ -607,13 +632,17 @@ function CallApp() {
 
                   <Box>
                     <FormControl fullWidth size="small" >
-                      <InputLabel>Select User</InputLabel>
+                      <InputLabel sx={{ color: 'white' }} >Select User</InputLabel>
                       <Select
                         value={uid}
                         onChange={(e) => setUid(e.target.value)}
                         label="Select User"
+                        sx={{
+                          // color: "#ffffff",
+
+                        }}
                       >
-                        <MenuItem value="">
+                        <MenuItem sx={{ color: "white" }} value="">
                           -- Select a user --
                         </MenuItem>
                         {user.map((u) => (
