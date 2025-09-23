@@ -12,8 +12,9 @@ import Navbar from "../../components/Navbar";
 import Footer from "./Footer";
 import AnimatedHero from "../../components/AnimatedHero";
 import appointmentImage from "../../assets/image/consult.jpg"
+import AppointmnetSucess from "../../AlertModal/AppointmnetSucess.jsx"
 
-import AppointmnetSucess from "../../AlertModal/appointmnetSucess";
+
 
 const services = [
     {
