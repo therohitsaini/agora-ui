@@ -311,19 +311,12 @@ function CallApp() {
       setIsLoading(false)
     }
   }
-  // useEffect(() => {
-  //   if (isInCall && callType === "video" && !isJoined && !clientRef.current) {
-  //     joinChannel();
-  //   }
-  // }, [isJoined, isInCall, callType]);
+ 
   useEffect(() => {
     if (isInCall && callType === "video" && !isJoined) {
       joinChannel();
     }
   }, [isInCall, callType]);
-
-
-
 
 
   if (localVideoRef.current && localTracksRef.current[1]) {
@@ -501,12 +494,12 @@ function CallApp() {
       body: JSON.stringify({ amountINR: 1, userId })
     });
     const data = await res.json();
-    const order = data.order;   // 👈 yaha se actual order nikalo
+    const order = data.order;  
 
     console.log("TEXT", order)
     // if()
     const options = {
-      key: "rzp_test_RJ31PhSmp5nbLQ", // test key_id
+      key: "rzp_test_RJ31PhSmp5nbLQ", 
       amount: order?.amount,
       currency: order?.currency,
       name: "My Calling App",

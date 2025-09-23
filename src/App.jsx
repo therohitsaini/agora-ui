@@ -6,6 +6,7 @@ import CallApp from './components/CallApp'
 import SignIn from './Auth/SignIn'
 import SignUp from './Auth/SignUp'
 import CallNotification from './components/CallNotification'
+import BookAppointment from './Dashbord/Pages/BookAppointment'
 // import Demo from './components/demo'
 
 
@@ -18,7 +19,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/callapp" element={<CallApp />} />
           <Route path="/callnotification" element={<CallNotification />} />
-          {/* <Route path="/vc-call" element={<Demo/>} /> */}
+          <Route path="/book-appointment" element={<BookAppointment />} />
         </Routes>
       </BrowserRouter>
     </Fragment>
