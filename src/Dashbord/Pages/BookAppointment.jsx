@@ -87,8 +87,7 @@ const BookAppointment = () => {
             })
             const data = await fetchURL.json()
             if (fetchURL.ok) {
-           
-                console.log(data)
+                alert("Sucess")
                 setOpenSuccess(true)
             }
         } catch (error) {
