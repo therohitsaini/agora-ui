@@ -1,96 +1,50 @@
-import React from "react";
-import { Box, Container, Typography, Grid, TextField, MenuItem, Button } from "@mui/material";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HomeIcon from "@mui/icons-material/Home";
+import PersonIcon from "@mui/icons-material/Person";
 
-const locations = ["New York", "Los Angeles", "Chicago"];
-const cars = ["Sedan", "SUV", "Hatchback"];
+const menuItems = [
+    { text: "Home", icon: <HomeIcon />, path: "/" },
+    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+    { text: "Profile", icon: <PersonIcon />, path: "/profile" },
+];
 
-const HeroBooking = () => {
+export default function DashboardLayout() {
+    const navigate = useNavigate();
+
     return (
-        <Box
-            sx={{
-                position: "relative",
-                height: "100vh",
-                backgroundImage: "url('/path-to-your-image.jpg')", // replace with your image
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    bgcolor: "rgba(63, 81, 181, 0.6)", // overlay color
-                },
-            }}
-        >
-            <Container
-                maxWidth="md"
+        <Box display="flex" height="100vh">
+            {/* Sidebar */}
+            <Box
                 sx={{
-                    position: "relative",
-                    zIndex: 1,
-                    py: 10,
-                    textAlign: "center",
-                    color: "white",
+                    width: 240,
+                    backgroundColor: "#111827",
+                    color: "#fff",
+                    p: 2,
                 }}
             >
-                {/* Headings */}
-                <Typography variant="h3" fontWeight="bold" gutterBottom>
-                    Fast And Easy Way To
-                </Typography>
-                <Typography variant="h4" fontWeight="bold" gutterBottom>
-                    Rent A Car
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 5 }}>
-                    Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry. Lorem Ipsum Has Been The Industry's Standard Dummy Text Ever.
-                </Typography>
+                <List>
+                    {menuItems.map((item) => (
+                        <ListItem key={item.text} disablePadding>
+                            <ListItemButton onClick={() => navigate(item.path)}>
+                                <ListItemIcon sx={{ color: "#fff", minWidth: 32, mr: 1 }}>
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={item.text}
+                                    primaryTypographyProps={{ fontSize: "14px", color: "#fff" }}
+                                />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Box>
 
-                {/* Booking Form */}
-                <Box
-                    sx={{
-                        bgcolor: "white",
-                        borderRadius: 2,
-                        p: 4,
-                        mt: 3,
-                    }}
-                >
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={4}>
-                            <TextField select fullWidth label="Location" variant="outlined">
-                                {locations.map((loc) => (
-                                    <MenuItem key={loc} value={loc}>{loc}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Full Name" variant="outlined" />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Phone Number" variant="outlined" />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField select fullWidth label="Cars" variant="outlined">
-                                {cars.map((car) => (
-                                    <MenuItem key={car} value={car}>{car}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField fullWidth type="date" variant="outlined" InputLabelProps={{ shrink: true }} label="Date" />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField fullWidth type="time" variant="outlined" InputLabelProps={{ shrink: true }} label="Time" />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                                Book Now
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Container>
+            {/* Content area */}
+            <Box flexGrow={1} p={3} sx={{ backgroundColor: "#0f172a", color: "#fff" }}>
+                <Outlet /> {/* Route components render here */}
+            </Box>
         </Box>
     );
-};
-
-export default HeroBooking;
+}
