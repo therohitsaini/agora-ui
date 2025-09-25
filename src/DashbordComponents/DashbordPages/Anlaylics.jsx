@@ -2,7 +2,7 @@ import React from 'react'
 
 function Anlaylics() {
     return (
-        <div>Anlaylics</div>
+        <div className='text-white'>Anlaylics   helollllllllllllllllllll</div>
     )
 }
 

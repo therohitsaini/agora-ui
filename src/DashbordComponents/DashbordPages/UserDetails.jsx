@@ -108,7 +108,8 @@ export default function UserDetails() {
                             height: "2px"
                         },
                         '& .MuiDataGrid-main': {
-                            backgroundColor: "black"
+                            backgroundColor: "black",
+                            fontSize:"13px"
                         }
                     }}
                 />
