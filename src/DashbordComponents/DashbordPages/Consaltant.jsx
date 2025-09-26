@@ -33,31 +33,47 @@ export default function AddConsultantForm() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: handle submit (API call or validation)
-        console.log('Submitted:', formData);
-        alert('Consultant Added Successfully!');
-        setFormData({
-            fullName: '',
-            email: '',
-            phone: '',
-            profession: '',
-            specialization: '',
-            licenseNo: '',
-            experience: '',
-            fees: '',
-            bio: '',
-        });
+
+        try {
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api-consultant/add-consultant`
+            const res = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Consultant Added Successfully!");
+                setFormData({
+                    fullName: "",
+                    email: "",
+                    phone: "",
+                    profession: "",
+                    specialization: "",
+                    licenseNo: "",
+                    experience: "",
+                    fees: "",
+                    bio: "",
+                });
+            } else {
+                alert(data.message || "Something went wrong!");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server error, please try again later.");
+        }
     };
 
     return (
         <div className='w-[100%] h-[80%] flex justify-center items-center'>
             <Paper sx={{ maxWidth: "70%", mx: 'auto', p: 4, mt: 4, bgcolor: '#f0e9e9' }}>
-                {/* <Typography variant="h5" component="h1" gutterBottom color="primary.light" fontWeight="bold">
-                Add Consultant
-            </Typography> */}
-
+    
                 <Box component="form" sx={{
                     display: "flex",
                     justifyContent: "center",
@@ -81,7 +97,7 @@ export default function AddConsultantForm() {
                                 color="primary"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404', } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -99,7 +115,7 @@ export default function AddConsultantForm() {
                                 color="primary"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -117,7 +133,7 @@ export default function AddConsultantForm() {
                                 variant="outlined"
                                 color="primary"
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
                     </div>
@@ -138,7 +154,7 @@ export default function AddConsultantForm() {
                                 variant="outlined"
                                 color="primary"
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             >
                                 {professions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
@@ -161,7 +177,7 @@ export default function AddConsultantForm() {
                                 color="primary"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
 
@@ -178,7 +194,7 @@ export default function AddConsultantForm() {
                                 size='small'
                                 color="primary"
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
                     </div>
@@ -198,7 +214,7 @@ export default function AddConsultantForm() {
                                 variant="outlined"
                                 color="primary"
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                            // inputProps={{ style: { color: '#e0e0e0' }, min: 0 }}
+                            // inputProps={{ style: { color: '#282727' }, min: 0 }}
                             />
                         </Grid>
 
@@ -217,25 +233,26 @@ export default function AddConsultantForm() {
                                 color="primary"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                            // inputProps={{ style: { color: '#e0e0e0' }, min: 0 }}
+                            // inputProps={{ style: { color: '#282727' }, min: 0 }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                label="Consultation Fees"
+                                label="Coming Soon"
                                 name="fees"
                                 type="number"
                                 sx={{
                                     width: "250px"
                                 }}
-                                value={formData.fees}
+                                disabled
+                                // value={formData.fees}
                                 onChange={handleChange}
                                 inputProps={{ min: 0 }}
                                 variant="outlined"
                                 color="primary"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                            // inputProps={{ style: { color: '#e0e0e0' }, min: 0 }}
+                            // inputProps={{ style: { color: '#282727' }, min: 0 }}
                             />
                         </Grid>
                     </div>
@@ -254,7 +271,7 @@ export default function AddConsultantForm() {
                                 color="black"
                                 size='small'
                                 InputLabelProps={{ style: { color: '#040404' } }}
-                                inputProps={{ style: { color: '#e0e0e0' } }}
+                                inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
                     </div>
@@ -270,7 +287,6 @@ export default function AddConsultantForm() {
                         </Button>
                     </Grid>
 
-                    {/* </Grid> */}
                 </Box>
             </Paper >
         </div>

@@ -18,7 +18,7 @@ function HomeContent() {
                 sx={{
 
                 }}>
-                <p className='text-white my-4 text-md font-bold'> Users Details</p>
+                <p className='text-white my-4 text-md font-bold'>New  Users </p>
                 <UserDetails />
             </Box>
         </Fragment>

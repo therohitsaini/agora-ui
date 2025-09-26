@@ -1,14 +1,37 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import AppBarDashbord from '../DashbordPages/AppBarDashbord'
 import SideDrower from '../DashbordPages/SideDrower'
 import { Outlet, useLocation } from 'react-router-dom'
 
 function DashbordHome() {
-    const location = useLocation();
+    const [allusers, setAllUsers] = useState([])
 
-    // Dynamic heading text based on path
+    const location = useLocation();
     const currentPath = location.pathname.split('/').pop();
     const pageTitle = currentPath.charAt(0).toUpperCase() + currentPath.slice(1);
+
+    const getAllusers = async (e) => {
+        try {
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`;
+            const response = await fetch(url, {
+                method: "GET",
+                headers: { "Content-Type": "application/josn" }
+            })
+            const { data } = await response.json()
+            if (response.ok) {
+                setAllUsers(data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        getAllusers()
+    }, [])
+
+    const data = {
+        allusers
+    }
 
     return (
         <div className="h-screen flex flex-col">
@@ -30,8 +53,8 @@ function DashbordHome() {
                         <p className='text-white py-5'>
                             <span className='text-slate-600 font-bold'>Dashboard &gt;</span> {pageTitle}
                         </p>
-                      
-                        <Outlet />
+
+                        <Outlet data />
                     </div>
                 </div>
             </div>
