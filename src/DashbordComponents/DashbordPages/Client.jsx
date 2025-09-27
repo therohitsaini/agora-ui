@@ -11,7 +11,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 import { useContext } from 'react';
 
-const darkTheme = createTheme({
+export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     background: {
@@ -141,23 +141,11 @@ function Client() {
                     </Typography>
 
                   </Box>
-                  {/* <Typography variant="caption" color="gray">
-                    Last 30 days
-                  </Typography> */}
+
                 </CardContent>
               </Card>
             ))}
-            {/* <Card sx={{ backgroundColor: '#121212', color: 'white', width: "100%" }}>
-              <CardContent>
-                <Typography variant="subtitle2">Explore your data</Typography>
-                <Typography variant="body2" sx={{ color: 'gray', mt: 1, mb: 2 }}>
-                  Uncover performance and visitor insights with our data wizardry.
-                </Typography>
-                <Button variant="contained" size="small" sx={{ backgroundColor: '#fff', color: '#000' }}>
-                  Get insights
-                </Button>
-              </CardContent>
-            </Card> */}
+
           </Box>
         </div>
       </Box>

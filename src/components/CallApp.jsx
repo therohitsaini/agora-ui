@@ -137,12 +137,24 @@ function CallApp() {
       setCallType(incomingCall.type);
       setChannelName(incomingCall.channelName);
       setIsInCall(true);
+      
+      // Emit call-accepted event
       socket.emit('call-accepted', {
         toUid: incomingCall.fromUid,
         fromUid: myUserId,
         type: incomingCall.type,
         channelName: incomingCall.channelName
       });
+      
+      // For voice calls, trigger joinChannel immediately
+      if (incomingCall.type === 'voice') {
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          if (window.joinChannelFromCallApp) {
+            window.joinChannelFromCallApp();
+          }
+        }, 100);
+      }
     } else {
       console.log(' Missing socket or incomingCall:', { socket: !!socket, incomingCall });
     }

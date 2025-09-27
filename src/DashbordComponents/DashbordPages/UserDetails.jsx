@@ -3,6 +3,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
+import { getLatestUsers } from '../../Utils/Utils';
+import { CircularProgress } from '@mui/material';
 
 const darkTheme = createTheme({
     palette: {
@@ -18,7 +20,7 @@ const darkTheme = createTheme({
 });
 
 const columns = [
-    { field: 'id', headerName: 'ID', width: 70, height: 10 },
+    { field: 'id', headerName: 'ID', width: 170, height: 10 },
     { field: 'fullname', headerName: 'First name', width: 130 },
     { field: 'EmailId', headerName: 'Email Id', width: 180 },
     {
@@ -27,42 +29,18 @@ const columns = [
         type: 'number',
         width: 90,
     },
-    // {
-    //     field: 'fullName',
-    //     headerName: 'Full name',
-    //     description: 'This column has a value getter and is not sortable.',
-    //     sortable: false,
-    //     width: 160,
-    //     // valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-    // },
+
 ];
 
-const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: 14 },
-    { id: 6, lastName: 'Melisandre', firstName: 'Joshn', age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-    { id: 10, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 11, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 12, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 13, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 14, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 15, lastName: 'Targaryen', firstName: 'Daenerys', age: 56 },
-    { id: 16, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 17, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 18, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 19, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
+
 
 export default function UserDetails() {
     const { allUsers, loading, error } = useContext(allUserDetailsContext);
     console.log(allUsers)
-    const rows = allUsers.map((item) => ({
+    const latestClinet = getLatestUsers(allUsers, 10)
+    console.log(latestClinet)
+
+    const rows = latestClinet.map((item) => ({
         id: item._id,
         fullname: item.fullname,
         EmailId: item.email,
@@ -77,10 +55,11 @@ export default function UserDetails() {
             {
                 loading
                     ?
-                    <div className='text-3xl text-white'>
-
+                    <div className='text-3xl text-white h-[200px] w-full flex justify-center items-center'>
+                        <CircularProgress enableTrackSlot size="3rem" />
                     </div>
                     :
+
                     <Paper
                         sx={{
                             height: 450,
@@ -109,9 +88,13 @@ export default function UserDetails() {
                                     borderBottom: '1px solid #222121c0',
                                 },
                                 '& .MuiDataGrid-columnHeaders': {
-                                    backgroundColor: '#1c1ca2',
+                                    // backgroundColor: '#1c1ca2',
                                     color: '#fff',
                                     fontWeight: 'bold',
+
+                                },
+                                '& .MuiDataGrid-columnHeaderTitleContainer, .MuiDataGrid-cell': {
+                                    display: 'flex', justifyContent: "center"
                                 },
                                 '& .MuiDataGrid-row:hover': {
                                     backgroundColor: '#181818b3',

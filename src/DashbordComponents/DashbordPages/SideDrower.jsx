@@ -13,7 +13,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 const menuItems = [
     { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/home" },
     { text: "Analytics", icon: <InsightsIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/analytics" },
-    { text: "Add Consultant", icon: <PersonAddIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant" },
+    { text: "Add Consultant", icon: <PersonAddIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant-root" },
     { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/clients" },
     { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/tasks" },
 ];
