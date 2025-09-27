@@ -16,6 +16,7 @@ function ConsultantTable() {
 
     const { allConsultant, getAllConsultant } = useContext(allUserDetailsContext)
 
+    
     console.log("allConsultant", allConsultant)
 
     const columns =
