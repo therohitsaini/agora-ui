@@ -1,15 +1,10 @@
-import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material'
-
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
-// import SparklineChart from '../../Charts/SparklineChart';
-
+import { Box } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 import { useContext } from 'react';
+import Overview from '../../Utils/Overview';
 
 export const darkTheme = createTheme({
   palette: {
@@ -33,7 +28,7 @@ const columns = [
     headerName: 'Status',
     width: 120,
     renderCell: (params) => {
-      console.log("Row Data:", params.row); // 👈 log yaha karo
+      console.log("Row Data:", params.row);
 
       return (
         <div className='h-full w-full flex justify-center items-center '>
@@ -81,73 +76,43 @@ function Client() {
     // permission: item.permission,
     status: item?.isActive
   }));
-  const cardData = [
-    {
-      title: 'Total Users',
-      value: allUsers.length,
-      change: '+25%',
-      changeColor: 'green',
-      icon: <TrendingUpIcon sx={{ color: 'green' }} />,
-    },
-    {
-      title: 'Active User',
-      value: '325',
-      change: '-25%',
-      changeColor: 'red',
-      icon: <TrendingDownIcon sx={{ color: 'red' }} />,
-    },
-    {
-      title: 'Recent Join',
-      value: '20',
-      change: '+5%',
-      changeColor: 'lightblue',
-      icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    },
-    {
-      title: 'Bloked User',
-      value: '120',
-      change: '+5%',
-      changeColor: 'lightblue',
-      icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    },
-  ];
+  // const cardData = [
+  //   {
+  //     title: 'Total Users',
+  //     value: allUsers.length,
+  //     change: '+25%',
+  //     changeColor: 'green',
+  //     icon: <TrendingUpIcon sx={{ color: 'green' }} />,
+  //   },
+  //   {
+  //     title: 'Active User',
+  //     value: '325',
+  //     change: '-25%',
+  //     changeColor: 'red',
+  //     icon: <TrendingDownIcon sx={{ color: 'red' }} />,
+  //   },
+  //   {
+  //     title: 'Recent Join',
+  //     value: '20',
+  //     change: '+5%',
+  //     changeColor: 'lightblue',
+  //     icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
+  //   },
+  //   {
+  //     title: 'Bloked User',
+  //     value: '120',
+  //     change: '+5%',
+  //     changeColor: 'lightblue',
+  //     icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
+  //   },
+  // ];
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
       {/* <Typography fontSize={20} gutterBottom color='white'>
         Client
       </Typography> */}
       <Box>
-        <div>
-          <Box sx={{ display: "flex", gap: 2, mt: 5 }} >
-            {cardData.map((card, index) => (
-              <Card
-                sx={{
-                  border: "1px solid #403e3e",
-                  backgroundColor: "black",
-                  color: 'white',
-                  width: "100%",
-                  boxShadow: "0px 4px 12px rgba(54, 52, 52, 0.4)",
-                  borderRadius: "7px"
-                }}>
-                <CardContent>
-                  <Typography variant="subtitle2" color="gray">
-                    {card.title}
-                  </Typography>
-                  <Typography variant="h5">{card.value}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                    {card.icon}
-                    <Typography variant="body2" sx={{ color: card.changeColor, ml: 1 }}>
-                      {card.change}
-                    </Typography>
-
-                  </Box>
-
-                </CardContent>
-              </Card>
-            ))}
-
-          </Box>
-        </div>
+        <Overview />
       </Box>
       <ThemeProvider theme={darkTheme}>
         {

@@ -9,40 +9,12 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useContext } from 'react';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 import { useEffect } from 'react';
-const cardData = [
-    {
-        title: 'Total Users',
-        value: "12K",
-        change: '+25%',
-        changeColor: 'green',
-        icon: <TrendingUpIcon sx={{ color: 'green' }} />,
-    },
-    {
-        title: 'Active User',
-        value: '325',
-        change: '-25%',
-        changeColor: 'red',
-        icon: <TrendingDownIcon sx={{ color: 'red' }} />,
-    },
-    {
-        title: 'Recent Join',
-        value: '20',
-        change: '+5%',
-        changeColor: 'lightblue',
-        icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    },
-    {
-        title: 'Bloked User',
-        value: '120',
-        change: '+5%',
-        changeColor: 'lightblue',
-        icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    },
-];
+import Overview from '../../Utils/Overview';
+
 
 function ConsultantTable() {
 
-    const { allConsultant, } = useContext(allUserDetailsContext)
+    const { allConsultant, getAllConsultant } = useContext(allUserDetailsContext)
 
     console.log("allConsultant", allConsultant)
 
@@ -100,7 +72,12 @@ function ConsultantTable() {
             })
             const response = await updateStatus.json()
             console.log(response)
-            // setRefreshFlag(prev => !prev);
+
+            // Refresh consultant data after successful update
+            if (updateStatus.ok) {
+                await getAllConsultant();
+                console.log("✅ Consultant data refreshed after status update");
+            }
         } catch (error) {
             console.log(error)
         }
@@ -115,6 +92,12 @@ function ConsultantTable() {
             })
             const response = await updateStatus.json()
             console.log(response)
+
+            // Refresh consultant data after successful update
+            if (updateStatus.ok) {
+                await getAllConsultant();
+                console.log("✅ Consultant data refreshed after status update");
+            }
         } catch (error) {
             console.log(error)
         }
@@ -134,36 +117,7 @@ function ConsultantTable() {
         <Fragment>
             <div className='main-consultant-table-container flex flex-col gap-10'>
                 <Box>
-                    <div className=''>
-                        <Box sx={{ display: "flex", gap: 2, mt: 5 }} >
-                            {cardData.map((card, index) => (
-                                <Card
-                                    sx={{
-                                        border: "1px solid #403e3e",
-                                        backgroundColor: "black",
-                                        color: 'white',
-                                        width: "100%",
-                                        boxShadow: "0px 4px 12px rgba(54, 52, 52, 0.4)",
-                                        borderRadius: "7px"
-                                    }}>
-                                    <CardContent>
-                                        <Typography variant="subtitle2" color="gray">
-                                            {card.title}
-                                        </Typography>
-                                        <Typography variant="h5">{card.value}</Typography>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                                            {card.icon}
-                                            <Typography variant="body2" sx={{ color: card.changeColor, ml: 1 }}>
-                                                {card.change}
-                                            </Typography>
-
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            ))}
-
-                        </Box>
-                    </div>
+                    <Overview />
                 </Box>
                 <ThemeProvider theme={darkTheme}>
                     {

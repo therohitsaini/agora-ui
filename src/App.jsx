@@ -14,8 +14,9 @@ import { AllUserProvider } from './DashbordComponents/ApiContext/ApiContextUserD
 import Client from './DashbordComponents/DashbordPages/Client'
 import ConsultantRoot from './DashbordComponents/DashboardRootPages/ConsultantRoot'
 import ConsultantTable from './DashbordComponents/DashbordPages/ConsultantTable'
-import Overview from './DashbordComponents/DashbordPages/Overview'
+
 import AddConsultantForm from './DashbordComponents/DashbordPages/AddConsultantForm'
+import Overview from './Utils/Overview'
 
 function App() {
   return (

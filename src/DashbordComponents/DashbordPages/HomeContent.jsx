@@ -1,6 +1,6 @@
 import React from 'react'
 import { Fragment } from 'react'
-import Overview from './Overview'
+import Overview from '../../Utils/Overview'
 import { PageViewsBarChart } from '../../Charts/SparklineChart'
 import SessionsChart from '../../Charts/SessionsChart'
 import UserDetails from './UserDetails'

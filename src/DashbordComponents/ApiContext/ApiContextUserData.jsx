@@ -60,7 +60,14 @@ export const AllUserProvider = ({ children }) => {
     }, []);
 
     return (
-        <allUserDetailsContext.Provider value={{ allUsers, loading, error, allConsultant }}>
+        <allUserDetailsContext.Provider value={{ 
+            allUsers, 
+            loading, 
+            error, 
+            allConsultant, 
+            getAllConsultant, 
+            getAllUsers 
+        }}>
             {children}
         </allUserDetailsContext.Provider>
     );
