@@ -73,7 +73,7 @@ export default function AddConsultantForm() {
     return (
         <div className='w-[100%] h-[80%] flex justify-center items-center'>
             <Paper sx={{ maxWidth: "70%", mx: 'auto', p: 4, mt: 4, bgcolor: '#f0e9e9' }}>
-    
+
                 <Box component="form" sx={{
                     display: "flex",
                     justifyContent: "center",
@@ -220,7 +220,7 @@ export default function AddConsultantForm() {
 
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                label="Consultation Fees"
+                                label=" Charges per minute"
                                 name="fees"
                                 type="number"
                                 sx={{

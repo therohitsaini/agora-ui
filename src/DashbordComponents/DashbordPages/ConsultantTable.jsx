@@ -16,17 +16,16 @@ function ConsultantTable() {
 
     const { allConsultant, getAllConsultant } = useContext(allUserDetailsContext)
 
-    
-    console.log("allConsultant", allConsultant)
 
     const columns =
         [
-            { field: 'id', headerName: 'ID', width: 170, height: 10 },
+            // { field: 'id', headerName: 'ID', width: 170, height: 10 },
             { field: 'fullname', headerName: 'First name', width: 180 },
             { field: 'EmailId', headerName: 'Email Id', width: 180 },
             { field: 'Phone', headerName: 'Contact Number', width: 150 },
             { field: 'Profession', headerName: 'Profession', width: 150 },
             { field: 'Experience', headerName: 'Experience', width: 150 },
+            { field: 'Fees', headerName: 'Conversion Fees', width: 150 },
 
             {
                 field: 'status',
@@ -104,6 +103,7 @@ function ConsultantTable() {
         }
     }
 
+    console.log("allConsultant", allConsultant)
     const rows = allConsultant.map((item) => ({
         id: item._id,
         fullname: item.fullName,
@@ -111,6 +111,7 @@ function ConsultantTable() {
         Phone: item.phone,
         Profession: item.profession,
         Experience: item.experience + " year ",
+        Fees: " ₹ " + item.fees + " per minute",
         status: item?.consultantStatus
         // status: item.userStatus
     }));
