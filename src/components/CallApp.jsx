@@ -5,6 +5,7 @@ import { IoCallOutline } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
 import { io } from "socket.io-client";
 import CallAlert from "./CallAlert";
+import { useAuth } from "../authProvider/AuthProvider";
 import {
   Box,
   Button,
@@ -52,6 +53,7 @@ function CallApp() {
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
   const navigator = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     const id = localStorage.getItem("user-ID");
@@ -137,7 +139,7 @@ function CallApp() {
       setCallType(incomingCall.type);
       setChannelName(incomingCall.channelName);
       setIsInCall(true);
-      
+
       // Emit call-accepted event
       socket.emit('call-accepted', {
         toUid: incomingCall.fromUid,
@@ -145,7 +147,7 @@ function CallApp() {
         type: incomingCall.type,
         channelName: incomingCall.channelName
       });
-      
+
       // For voice calls, trigger joinChannel immediately
       if (incomingCall.type === 'voice') {
         // Small delay to ensure state is updated
@@ -186,9 +188,14 @@ function CallApp() {
 
 
   const userDetails = async () => {
+    const token = localStorage.getItem("access_user")
     try {
       const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`;
-      const fetchData = await fetch(url, { method: "GET" });
+      const fetchData = await fetch(url,
+        {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
       const { data } = await fetchData.json();
       if (fetchData.ok) setUser(data);
     } catch (error) {
@@ -323,7 +330,7 @@ function CallApp() {
       setIsLoading(false)
     }
   }
- 
+
   useEffect(() => {
     if (isInCall && callType === "video" && !isJoined) {
       joinChannel();
@@ -490,10 +497,8 @@ function CallApp() {
   }
 
   const logOutButton = () => {
+    logout();
     navigator('/');
-    localStorage.removeItem("user-ID");
-    window.location.reload();
-
   }
 
 
@@ -506,12 +511,12 @@ function CallApp() {
       body: JSON.stringify({ amountINR: 1, userId })
     });
     const data = await res.json();
-    const order = data.order;  
+    const order = data.order;
 
     console.log("TEXT", order)
     // if()
     const options = {
-      key: "rzp_test_RJ31PhSmp5nbLQ", 
+      key: "rzp_test_RJ31PhSmp5nbLQ",
       amount: order?.amount,
       currency: order?.currency,
       name: "My Calling App",

@@ -2,6 +2,7 @@ import { Button, CircularProgress } from "@mui/material";
 import React, { Fragment, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../authProvider/AuthProvider";
 // import { useDispatch } from "react-redux";
 // import { fetchFullName } from "../redux/actions"; // <-- uncomment if needed
 
@@ -14,6 +15,7 @@ function SignIn() {
     const email = useRef("");
     const password = useRef("");
     const navigate = useNavigate();
+    const { login } = useAuth();
     // const dispatch = useDispatch();
 
     const signInFromHandler = async (e) => {
@@ -43,23 +45,23 @@ function SignIn() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(userObject),
             });
-
-            if (!fetchData.ok) {
-                const error = await fetchData.json();
-                toast.error(error.message || "Login failed!");
-                return;
-            }
-
-            const response = await fetchData.json();
-            console.log("response", response);
-
-            toast.success(response.message || "Login successful!");
-
-            if (response?.userData?._id) {
+            const response = await fetchData.json()
+            console.log("Login response:", response)
+            if (fetchData.ok) {
+                // Store user data and token
                 localStorage.setItem("user-ID", response.userData._id);
+                localStorage.setItem("access_user", response.data);
+                
+                // Use AuthProvider login method
+                login(response.data, response.userData);
+                
+                toast.success(response.message || "Login successful!");
+                navigate("/callapp");
+            } else {
+                toast.error(response.message || "Login failed!");
             }
 
-            navigate("/callapp");
+
         } catch (err) {
             console.error("sign in failed ...! ", err);
             toast.error("Server not reachable!");
@@ -152,7 +154,7 @@ function SignIn() {
                                 fontSize: 14,
                                 p: 1,
                                 color: "white",
-                                bgcolor:isLoading ? "#686262" : "black",
+                                bgcolor: isLoading ? "#686262" : "black",
                                 border: "none",
                                 "&:hover": { bgcolor: "gray.800" },
                             }}
