@@ -9,7 +9,7 @@ export const AllUserProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-
+ 
     const getAllUsers = async () => {
         try {
             setLoading(true);
@@ -18,12 +18,20 @@ export const AllUserProvider = ({ children }) => {
 
             const res = await fetch(url, {
                 method: "GET",
-                headers: { "Content-Type": "application/josn" }
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('access_user') || ''}`
+                }
             });
+            if (res.status === 401) {
+                setAllUsers([]);
+                setError('Unauthorized');
+                return;
+            }
             const data = await res.json();
 
             if (res.ok) {
-                setAllUsers(data.data || []); 
+                setAllUsers(data.data || []);
             } else {
                 setError(data.message || "Failed to fetch allUsers");
             }
@@ -41,9 +49,9 @@ export const AllUserProvider = ({ children }) => {
                 method: "GET",
                 headers: { "Content-Type": "application/json" }
             });
-            
+
             const responseData = await res.json();
-            
+
             if (res.ok) {
                 const consultants = responseData.findConsultant || [];
                 setAllConsultant(consultants);
@@ -62,7 +70,7 @@ export const AllUserProvider = ({ children }) => {
         getAllUsers();
         getAllConsultant()
     }, []);
- 
+
     return (
         <allUserDetailsContext.Provider value={{
             allUsers,

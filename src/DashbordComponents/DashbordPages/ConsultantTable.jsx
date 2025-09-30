@@ -15,11 +15,11 @@ import Overview from '../../Utils/Overview';
 function ConsultantTable() {
 
     const { allConsultant, getAllConsultant } = useContext(allUserDetailsContext)
-
+    const overViewLength = allConsultant.length
 
     const columns =
         [
-            // { field: 'id', headerName: 'ID', width: 170, height: 10 },
+           
             { field: 'fullname', headerName: 'First name', width: 180 },
             { field: 'EmailId', headerName: 'Email Id', width: 180 },
             { field: 'Phone', headerName: 'Contact Number', width: 150 },
@@ -33,8 +33,7 @@ function ConsultantTable() {
                 width: 180,
                 renderCell: (params) => {
                     const isActive = params.row.status === true;
-                    console.log("isActive", isActive)
-
+            
                     return (
                         <div className='flex gap-1 justify-center items-center'>
                             <Button
@@ -76,7 +75,7 @@ function ConsultantTable() {
             // Refresh consultant data after successful update
             if (updateStatus.ok) {
                 await getAllConsultant();
-                console.log("✅ Consultant data refreshed after status update");
+    
             }
         } catch (error) {
             console.log(error)
@@ -96,14 +95,14 @@ function ConsultantTable() {
             // Refresh consultant data after successful update
             if (updateStatus.ok) {
                 await getAllConsultant();
-                console.log("✅ Consultant data refreshed after status update");
+               
             }
         } catch (error) {
             console.log(error)
         }
     }
 
-    console.log("allConsultant", allConsultant)
+ 
     const rows = allConsultant.map((item) => ({
         id: item._id,
         fullname: item.fullName,
@@ -119,7 +118,7 @@ function ConsultantTable() {
         <Fragment>
             <div className='main-consultant-table-container flex flex-col gap-10'>
                 <Box>
-                    <Overview />
+                    <Overview overViewLength={overViewLength}   />
                 </Box>
                 <ThemeProvider theme={darkTheme}>
                     {

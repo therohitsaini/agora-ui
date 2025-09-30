@@ -46,17 +46,20 @@ function SignIn() {
                 body: JSON.stringify(userObject),
             });
             const response = await fetchData.json()
-            console.log("Login response:", response)
+            console.log("Login response:", response.userData.role)
             if (fetchData.ok) {
-                // Store user data and token
+              
                 localStorage.setItem("user-ID", response.userData._id);
                 localStorage.setItem("access_user", response.data);
-                
-                // Use AuthProvider login method
                 login(response.data, response.userData);
-                
                 toast.success(response.message || "Login successful!");
-                navigate("/callapp");
+                const role = String(response?.userData?.role || '').trim().toLowerCase();
+                if (role === 'admin') {
+                    navigate("/dashboard/home");
+                } else {
+                    navigate("/callapp");
+                }
+
             } else {
                 toast.error(response.message || "Login failed!");
             }

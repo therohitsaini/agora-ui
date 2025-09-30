@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import React, { Fragment } from 'react'
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from "@mui/icons-material/Home";
 import InsightsIcon from "@mui/icons-material/Insights";
 import PeopleIcon from "@mui/icons-material/People";
@@ -9,6 +9,21 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import InfoIcon from "@mui/icons-material/Info";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useState } from 'react';
+import { useAuth } from '../../authProvider/AuthProvider';
+
+const options = [
+    'My Profile',
+    'settings',
+    'Log Out',
+
+];
+
+const ITEM_HEIGHT = 48;
 
 const menuItems = [
     { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/home" },
@@ -24,46 +39,76 @@ const secondaryItems = [
     { text: "Feedback", icon: <HelpOutlineIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/feedback" },
 ];
 
+const menuItemConsultant = [
+    { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant-home" },
+    { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/clients" },
+    { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/tasks" },
+];
+
 function SideDrower() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout, user } = useAuth();
+    const [anchorEl, setAnchorEl] = useState();
+    const open = Boolean(anchorEl);
+    
+    // Determine if user is a consultant based on their role
+    const isConsultant = user?.role === 'consultant';
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuSelect = (option) => {
+        if (option === 'Log Out') {
+            // Clear token via AuthProvider (removes 'access_user' and 'user-ID')
+            logout();
+            navigate('/');
+        }
+        setAnchorEl(null);
+    };
 
     return (
         <Fragment>
             <div className='side-bar flex flex-col justify-between h-full'>
                 <Box>
                     <List sx={{ mt: 10, px: "10px" }}>
-                        {menuItems.map((item) => (
-                            <ListItem key={item.text} disablePadding>
-                                <ListItemButton
-                                    component={Link}
-                                    to={item.path}
-                                    sx={{
-                                        borderRadius: 2,
-                                        "&.Mui-selected": {
-                                            backgroundColor: "#1e293b",
-                                        },
-                                        p: "5px",
-                                        px: "10px",
-                                    }}
-                                    selected={location.pathname === item.path}
-                                >
-                                    <ListItemIcon
+                        {
+                            (isConsultant ? menuItemConsultant : menuItems).map((item) => (
+                                <ListItem key={item.text} disablePadding>
+                                    <ListItemButton
+                                        component={Link}
+                                        to={item.path}
                                         sx={{
-                                            color: "#fff",
-                                            minWidth: 22,
-                                            mr: 1,
+                                            borderRadius: 2,
+                                            "&.Mui-selected": {
+                                                backgroundColor: "#1e293b",
+                                            },
+                                            p: "5px",
+                                            px: "10px",
                                         }}
+                                        selected={location.pathname === item.path}
                                     >
-                                        {item.icon}
-                                    </ListItemIcon>
+                                        <ListItemIcon
+                                            sx={{
+                                                color: "#fff",
+                                                minWidth: 22,
+                                                mr: 1,
+                                            }}
+                                        >
+                                            {item.icon}
+                                        </ListItemIcon>
 
-                                    <ListItemText
-                                        primary={item.text}
-                                        primaryTypographyProps={{ fontSize: "13px", color: "#fff" }}
-                                    />
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
+                                        <ListItemText
+                                            primary={item.text}
+                                            primaryTypographyProps={{ fontSize: "13px", color: "#fff" }}
+                                        />
+                                    </ListItemButton>
+                                </ListItem>
+                            ))
+                        }
                     </List>
 
                     <List sx={{ mt: 2, px: "7px" }}>
@@ -133,17 +178,65 @@ function SideDrower() {
 
                 <div>
                     <Divider sx={{ borderColor: "#334155" }} />
-                    <Box display="flex" alignItems="center" p={1.5}>
-                        <Avatar src="/avatar.png" />
-                        <Box ml={1.5} flexGrow={1}>
-                            <Typography fontWeight="bold" fontSize={14}>
-                                Riley Carter
-                            </Typography>
-                            <Typography fontSize={12} sx={{ color: "#94a3b8" }}>
-                                riley@email.com
-                            </Typography>
+                    <div className='flex gap-4 '>
+                        <Box display="flex" alignItems="center" p={1.5}>
+                            <Avatar src={user?.avatar || "/avatar.png"} />
+                            <Box ml={1.5} flexGrow={1}>
+                                <Typography fontWeight="bold" fontSize={14}>
+                                    {user?.name || user?.username || "User"}
+                                </Typography>
+                                <Typography fontSize={12} sx={{ color: "#94a3b8" }}>
+                                    {user?.email || "user@email.com"}
+                                </Typography>
+                            </Box>
                         </Box>
-                    </Box>
+                        <div className='settings   flex justify-center  items-center'>
+                            <div className=''>
+                                <IconButton
+                                    aria-label="more"
+                                    id="long-button"
+                                    aria-controls={open ? 'long-menu' : undefined}
+                                    aria-expanded={open ? 'true' : undefined}
+                                    aria-haspopup="true"
+                                    onClick={handleClick}
+                                    sx={{ color: "white" }}
+                                >
+                                    <MoreVertIcon />
+                                </IconButton>
+                                <Menu
+                                    id="long-menu"
+                                    anchorEl={anchorEl}
+                                    open={open}
+                                    onClose={handleClose}
+                                    slotProps={{
+                                        paper: {
+                                            style: {
+                                                maxHeight: ITEM_HEIGHT * 4.5,
+                                                width: '20ch',
+                                            },
+                                        },
+                                        list: {
+                                            'aria-labelledby': 'long-button',
+                                        },
+                                    }}
+                                >
+                                    {options.map((option) => (
+                                        <MenuItem
+                                            sx={{
+                                                fontSize: "15px",
+                                                // fontWeight:"bold"
+                                            }}
+                                            key={option}
+                                            selected={option === 'My Profile'}
+                                            onClick={() => handleMenuSelect(option)}
+                                        >
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Menu>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Fragment>

@@ -162,28 +162,29 @@ const BookAppointment = () => {
                             justifyContent: "center",
                             gap: "10px"
                         }}>
-                            {services.map((service) => (
-                                <Grid key={service.id}>
-                                    <Card
-                                        sx={{
-                                            textAlign: "center",
-                                            p: 3,
-                                            borderRadius: 3,
-                                            transition: "0.3s",
-                                        }}
-                                    >
-                                        {service.icon}
-                                        <CardContent>
-                                            <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                                {service.title}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {service.desc}
-                                            </Typography>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            ))}
+                            {
+                                services.map((service) => (
+                                    <Grid key={service.id}>
+                                        <Card
+                                            sx={{
+                                                textAlign: "center",
+                                                p: 3,
+                                                borderRadius: 3,
+                                                transition: "0.3s",
+                                            }}
+                                        >
+                                            {service.icon}
+                                            <CardContent>
+                                                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                                                    {service.title}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {service.desc}
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
                         </Grid>
                     </Container>
                 </Box>

@@ -1,50 +1,64 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HomeIcon from "@mui/icons-material/Home";
-import PersonIcon from "@mui/icons-material/Person";
+import * as React from 'react';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useState } from 'react';
 
-const menuItems = [
-    { text: "Home", icon: <HomeIcon />, path: "/" },
-    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
-    { text: "Profile", icon: <PersonIcon />, path: "/profile" },
+const options = [
+    'My Profile',
+    'settings',
+    'Log Out',
+
 ];
 
-export default function DashboardLayout() {
-    const navigate = useNavigate();
+const ITEM_HEIGHT = 48;
+
+export default function LongMenu() {
+    const [anchorEl, setAnchorEl] = useState();
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     return (
-        <Box display="flex" height="100vh">
-            {/* Sidebar */}
-            <Box
-                sx={{
-                    width: 240,
-                    backgroundColor: "#111827",
-                    color: "#fff",
-                    p: 2,
+        <div>
+            <IconButton
+                aria-label="more"
+                id="long-button"
+                aria-controls={open ? 'long-menu' : undefined}
+                aria-expanded={open ? 'true' : undefined}
+                aria-haspopup="true"
+                onClick={handleClick}
+            >
+                <MoreVertIcon />
+            </IconButton>
+            <Menu
+                id="long-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                slotProps={{
+                    paper: {
+                        style: {
+                            maxHeight: ITEM_HEIGHT * 4.5,
+                            width: '20ch',
+                        },
+                    },
+                    list: {
+                        'aria-labelledby': 'long-button',
+                    },
                 }}
             >
-                <List>
-                    {menuItems.map((item) => (
-                        <ListItem key={item.text} disablePadding>
-                            <ListItemButton onClick={() => navigate(item.path)}>
-                                <ListItemIcon sx={{ color: "#fff", minWidth: 32, mr: 1 }}>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={item.text}
-                                    primaryTypographyProps={{ fontSize: "14px", color: "#fff" }}
-                                />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
-                </List>
-            </Box>
-
-            {/* Content area */}
-            <Box flexGrow={1} p={3} sx={{ backgroundColor: "#0f172a", color: "#fff" }}>
-                <Outlet /> {/* Route components render here */}
-            </Box>
-        </Box>
+                {options.map((option) => (
+                    <MenuItem key={option}  onClick={handleClose}>
+                        {option}
+                    </MenuItem>
+                ))}
+            </Menu>
+        </div>
     );
 }

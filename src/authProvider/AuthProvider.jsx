@@ -8,6 +8,23 @@ export const AuthProvider = ({ children }) => {
    const [loading, setLoading] = useState(true);
    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+   const loadUserFromApi = async (token) => {
+      try {
+         const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
+         const id = localStorage.getItem('user-ID');
+         if (!id) return null;
+         const res = await fetch(`${backendUrl}/api/users/${id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+         });
+         if (!res.ok) return null;
+         const json = await res.json();
+         return json?.data || null;
+      } catch {
+         return null;
+      }
+   };
+
    const fetchverifyToken = async (token) => {
       try {
          const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
@@ -22,7 +39,7 @@ export const AuthProvider = ({ children }) => {
          });
          
          if (fetchData.status === 401) {
-            console.log("❌ Token expired or invalid");
+            console.log(" Token expired or invalid");
             localStorage.removeItem("access_user");
             localStorage.removeItem("user-ID");
             setUser(null);
@@ -31,9 +48,14 @@ export const AuthProvider = ({ children }) => {
          }
          
          const response = await fetchData.json();
-         console.log("✅ Token verified successfully:", response);
+         console.log(" Token verified successfully:", response);
          
-         if (response.user) {
+         // Always load full profile to ensure role is present
+         const full = await loadUserFromApi(token);
+         if (full) {
+            setUser(full);
+            setIsAuthenticated(true);
+         } else if (response.user) {
             setUser(response.user);
             setIsAuthenticated(true);
          } else {
@@ -56,8 +78,9 @@ export const AuthProvider = ({ children }) => {
             
             if (userDataResponse.ok) {
                const userData = await userDataResponse.json();
-               console.log("✅ User data fetched successfully:", userData);
-               setUser(userData.data[0]); // Assuming user data is in data array
+               const currentId = localStorage.getItem('user-ID');
+               const me = Array.isArray(userData.data) ? userData.data.find(u => u?._id === currentId) : null;
+               setUser(me || null);
                setIsAuthenticated(true);
             } else {
                throw new Error("Failed to fetch user data");

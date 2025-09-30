@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
 function PublicRoute({ children }) {
-   const { isAuthenticated, loading } = useAuth();
+   const { isAuthenticated, loading, user } = useAuth();
 
    // Show loading while checking authentication
    if (loading) {
@@ -16,7 +16,9 @@ function PublicRoute({ children }) {
 
    // If authenticated, redirect to dashboard
    if (isAuthenticated) {
-      console.log("✅ User already authenticated, redirecting to dashboard");
+      const role = String(user?.role || '').trim().toLowerCase();
+      console.log("✅ User already authenticated, redirecting based on role:", role);
+      if (role === 'admin') return <Navigate to="/dashboard/home" replace />;
       return <Navigate to="/callapp" replace />;
    }
 

@@ -19,6 +19,7 @@ export default function AddConsultantForm() {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        password: '',
         phone: '',
         profession: '',
         specialization: '',
@@ -121,6 +122,27 @@ export default function AddConsultantForm() {
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
+                                label="Password"
+                                name="password"
+                                type="password"
+                                sx={{
+                                    width: "250px"
+                                }}
+                                value={formData.password}
+                                onChange={handleChange}
+                                variant="outlined"
+                                color="primary"
+                                size='small'
+                                InputLabelProps={{ style: { color: '#040404' } }}
+                                inputProps={{ style: { color: '#282727' } }}
+                            />
+                        </Grid>
+
+                    </div>
+                    <div className='flex justify-center gap-2 '>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                required
                                 label="Phone Number"
                                 name="phone"
                                 type="tel"
@@ -136,8 +158,6 @@ export default function AddConsultantForm() {
                                 inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
-                    </div>
-                    <div className='flex justify-center gap-2 '>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 select
@@ -181,6 +201,9 @@ export default function AddConsultantForm() {
                             />
                         </Grid>
 
+
+                    </div>
+                    <div className='flex gap-2 justify-center '>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 label="License / ID Number"
@@ -197,8 +220,6 @@ export default function AddConsultantForm() {
                                 inputProps={{ style: { color: '#282727' } }}
                             />
                         </Grid>
-                    </div>
-                    <div className='flex gap-2 justify-center '>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 label="Years of Experience"
@@ -236,25 +257,7 @@ export default function AddConsultantForm() {
                             // inputProps={{ style: { color: '#282727' }, min: 0 }}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Coming Soon"
-                                name="fees"
-                                type="number"
-                                sx={{
-                                    width: "250px"
-                                }}
-                                disabled
-                                // value={formData.fees}
-                                onChange={handleChange}
-                                inputProps={{ min: 0 }}
-                                variant="outlined"
-                                color="primary"
-                                size='small'
-                                InputLabelProps={{ style: { color: '#040404' } }}
-                            // inputProps={{ style: { color: '#282727' }, min: 0 }}
-                            />
-                        </Grid>
+
                     </div>
                     <div >
                         <Grid item xs={12}>
