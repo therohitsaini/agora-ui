@@ -19,6 +19,7 @@ function PublicRoute({ children }) {
       const role = String(user?.role || '').trim().toLowerCase();
       console.log("✅ User already authenticated, redirecting based on role:", role);
       if (role === 'admin') return <Navigate to="/dashboard/home" replace />;
+      if (role === 'consultant') return <Navigate to="/consultant-dashboard" replace />;
       return <Navigate to="/callapp" replace />;
    }
 

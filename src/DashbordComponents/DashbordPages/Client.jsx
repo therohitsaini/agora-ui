@@ -5,6 +5,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 import { useContext } from 'react';
 import Overview from '../../Utils/Overview';
+import { cardData } from '../../FalbackData';
 
 export const darkTheme = createTheme({
   palette: {
@@ -112,7 +113,7 @@ function Client() {
         Client
       </Typography> */}
       <Box>
-        <Overview />
+        <Overview cardData={cardData} />
       </Box>
       <ThemeProvider theme={darkTheme}>
         {

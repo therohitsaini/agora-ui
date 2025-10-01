@@ -7,7 +7,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 
 
 
-function Overview({ overViewLength }) {
+function Overview({ overViewLength ,cardData}) {
     const [animatedValues, setAnimatedValues] = useState([0, 0, 0, 0]);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -51,36 +51,36 @@ function Overview({ overViewLength }) {
         return value.toString();
     };
 
-    const cardData = [
-        {
-            title: 'Total Clients',
-            value: overViewLength,
-            change: '+2%',
-            changeColor: 'green',
-            icon: <TrendingUpIcon sx={{ color: 'green' }} />,
-        },
-        {
-            title: 'Conversions',
-            value: overViewLength,
-            change: '-5%',
-            changeColor: 'red',
-            icon: <TrendingDownIcon sx={{ color: 'red' }} />,
-        },
-        {
-            title: 'Event count',
-            value: 100,
-            change: '+0%',
-            changeColor: 'lightblue',
-            icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-        },
-        {
-            title: 'Bloked User',
-            value: 0,
-            change: '+0.1%',
-            changeColor: 'lightblue',
-            icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-        },
-    ];
+    // const cardData = [
+    //     {
+    //         title: 'Total Clients',
+    //         value: overViewLength,
+    //         change: '+2%',
+    //         changeColor: 'green',
+    //         icon: <TrendingUpIcon sx={{ color: 'green' }} />,
+    //     },
+    //     {
+    //         title: 'Conversions',
+    //         value: overViewLength,
+    //         change: '-5%',
+    //         changeColor: 'red',
+    //         icon: <TrendingDownIcon sx={{ color: 'red' }} />,
+    //     },
+    //     {
+    //         title: 'Event count',
+    //         value: 100,
+    //         change: '+0%',
+    //         changeColor: 'lightblue',
+    //         icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
+    //     },
+    //     {
+    //         title: 'Bloked User',
+    //         value: 0,
+    //         change: '+0.1%',
+    //         changeColor: 'lightblue',
+    //         icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
+    //     },
+    // ];
 
     return (
         <Box sx={{}}>

@@ -21,6 +21,10 @@ import ProtectRoute from './authProvider/ProtectRoute'
 import PublicRoute from './authProvider/PublicRoute'
 import AdminRoute from './authProvider/AdminRoute'
 import ConsultantHome from './ConsultantDashboard/ConsultantHome'
+import HomeConsultant from './ConsultantDashboard/Pages/HomeConsultant'
+import ConsultantClients from './ConsultantDashboard/Pages/ConsultantClients'
+import AnalyticsConsultant from './ConsultantDashboard/Pages/AnalyticsConsultant'
+import Profile from './components/Profile'
 
 function App() {
   return (
@@ -86,8 +90,21 @@ function App() {
                 <Route path='consultant-table' element={<ConsultantTable />} />
                 <Route path='overview' element={<Overview />} />
                 <Route path='consultant-home' element={<ConsultantHome />} />
+                <Route path='profile' element={<Profile />} />
                 <Route index element={<Navigate to="home" replace />} />
                 {/* Nasted Dashboard Route End */}
+              </Route>
+              <Route path="/consultant-dashboard"
+                element={
+                  // <ProtectRoute>
+                  <ConsultantHome />
+                  // </ProtectRoute>
+                }>
+                <Route path='homeconsultant' element={<HomeConsultant />} />
+                <Route path='clients-consultant' element={<ConsultantClients />} />
+                <Route path='analytics-consultant' element={<AnalyticsConsultant />} />
+                <Route path='profile' element={<Profile />} />
+                <Route index element={<Navigate to="homeconsultant" replace />} />
               </Route>
             </Routes>
           </AllUserProvider>

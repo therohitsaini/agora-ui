@@ -15,8 +15,14 @@ function AdminRoute({ children }) {
 
    const role = String(user?.role || '').trim().toLowerCase();
 
-   if (!isAuthenticated || role !== 'admin') {
+   if (!isAuthenticated) {
       return <Navigate to="/" replace />;
+   }
+
+   if (role !== 'admin') {
+      // Non-admin users (e.g., consultants) are redirected to their dashboard
+      if (role === 'consultant') return <Navigate to="/consultant-dashboard" replace />;
+      return <Navigate to="/callapp" replace />;
    }
 
    return children;

@@ -48,15 +48,20 @@ function SignIn() {
             const response = await fetchData.json()
             console.log("Login response:", response.userData.role)
             if (fetchData.ok) {
-              
+
                 localStorage.setItem("user-ID", response.userData._id);
                 localStorage.setItem("access_user", response.data);
                 login(response.data, response.userData);
                 toast.success(response.message || "Login successful!");
                 const role = String(response?.userData?.role || '').trim().toLowerCase();
+                console.log("role", role)
                 if (role === 'admin') {
                     navigate("/dashboard/home");
-                } else {
+                }
+                else if (role === 'consultant') {
+                    navigate("/consultant-dashboard");
+                }
+                else {
                     navigate("/callapp");
                 }
 

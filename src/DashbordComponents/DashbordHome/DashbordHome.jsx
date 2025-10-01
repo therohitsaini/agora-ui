@@ -3,6 +3,13 @@ import AppBarDashbord from '../DashbordPages/AppBarDashbord'
 import SideDrower from '../DashbordPages/SideDrower'
 import { Outlet, useLocation } from 'react-router-dom'
 
+const profileOptions = [
+    { text: "Profile", path: "/dashboard/profile" },
+    { text: "Settings", path: "/dashboard/settings" },
+    { text: "Logout", path: "/dashboard/logout" },
+
+];
+
 function DashbordHome() {
     const [allusers, setAllUsers] = useState([])
 
@@ -44,7 +51,7 @@ function DashbordHome() {
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
                 <div className="w-60 bg-[#050505f3] text-white flex-shrink-0 -mt-10">
-                    <SideDrower />
+                    <SideDrower profileOptions={profileOptions} />
                 </div>
 
                 {/* Main Content */}

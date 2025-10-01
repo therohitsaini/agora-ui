@@ -6,10 +6,11 @@ export const allUserDetailsContext = createContext();
 export const AllUserProvider = ({ children }) => {
     const [allUsers, setAllUsers] = useState([]);
     const [allConsultant, setAllConsultant] = useState([])
+    const [consultantByID, setConsultantByID] = useState([])
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
- 
+
     const getAllUsers = async () => {
         try {
             setLoading(true);
@@ -65,10 +66,28 @@ export const AllUserProvider = ({ children }) => {
             // setLoading(false);
         }
     }
+    const getConsultantByID = async (id) => {
+        try {
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api-consultant/api-consultant-by-id/${id}`;
+            const res = await fetch(url,{
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            });
+            const data = await res.json();
+            console.log("consultant by id data__________", data)
+            if (res.ok) {
+                setConsultantByID(data.consultant);
+            }
+        } catch (err) {
+            console.log(" Error in getConsultantByID:", err);
+            setError("Server error, please try again later.");
+        }
+    }
 
     useEffect(() => {
         getAllUsers();
         getAllConsultant()
+        getConsultantByID()
     }, []);
 
     return (
@@ -78,7 +97,9 @@ export const AllUserProvider = ({ children }) => {
             error,
             allConsultant,
             getAllConsultant,
-            getAllUsers
+            getAllUsers,
+            consultantByID,
+            getConsultantByID
         }}>
             {children}
         </allUserDetailsContext.Provider>

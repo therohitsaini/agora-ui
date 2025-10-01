@@ -10,6 +10,7 @@ import { useContext } from 'react';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 import { useEffect } from 'react';
 import Overview from '../../Utils/Overview';
+import { cardData } from '../../FalbackData';
 
 
 function ConsultantTable() {
@@ -118,7 +119,7 @@ function ConsultantTable() {
         <Fragment>
             <div className='main-consultant-table-container flex flex-col gap-10'>
                 <Box>
-                    <Overview overViewLength={overViewLength}   />
+                    <Overview overViewLength={overViewLength} cardData={cardData} />
                 </Box>
                 <ThemeProvider theme={darkTheme}>
                     {

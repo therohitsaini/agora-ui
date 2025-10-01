@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
-import React, { Fragment } from 'react'
+import React, { Fragment, useContext, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from "@mui/icons-material/Home";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
 import { useAuth } from '../../authProvider/AuthProvider';
+import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 
 const options = [
     'My Profile',
@@ -22,6 +23,7 @@ const options = [
     'Log Out',
 
 ];
+
 
 const ITEM_HEIGHT = 48;
 
@@ -39,21 +41,18 @@ const secondaryItems = [
     { text: "Feedback", icon: <HelpOutlineIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/feedback" },
 ];
 
-const menuItemConsultant = [
-    { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant-home" },
-    { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/clients" },
-    { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/tasks" },
-];
 
-function SideDrower() {
+
+function SideDrower({ menuItemConsultant, profileOptions }) {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout, user } = useAuth();
     const [anchorEl, setAnchorEl] = useState();
     const open = Boolean(anchorEl);
-    
-    // Determine if user is a consultant based on their role
-    const isConsultant = user?.role === 'consultant';
+
+
+    // const isConsultant = consultantByID?.role === 'consultant';
+    // console.log("isConsultant", isConsultant)
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -62,8 +61,18 @@ function SideDrower() {
     };
 
     const handleMenuSelect = (option) => {
-        if (option === 'Log Out') {
-            // Clear token via AuthProvider (removes 'access_user' and 'user-ID')
+        console.log("option", option)
+        if (option === '/consultant-dashboard/profile') {
+            navigate('/consultant-dashboard/profile');
+        }
+        if (option === 'Settings') {
+            navigate('/consultant-dashboard/settings');
+        }
+        if (option === '/dashboard/profile') {
+            navigate('/dashboard/profile');
+        }
+      
+        if (option === '/consultant-dashboard/logout') {
             logout();
             navigate('/');
         }
@@ -76,7 +85,7 @@ function SideDrower() {
                 <Box>
                     <List sx={{ mt: 10, px: "10px" }}>
                         {
-                            (isConsultant ? menuItemConsultant : menuItems).map((item) => (
+                            (menuItemConsultant ? menuItemConsultant : menuItems).map((item) => (
                                 <ListItem key={item.text} disablePadding>
                                     <ListItemButton
                                         component={Link}
@@ -175,7 +184,6 @@ function SideDrower() {
                         </Button>
                     </Box>
                 </Box>
-
                 <div>
                     <Divider sx={{ borderColor: "#334155" }} />
                     <div className='flex gap-4 '>
@@ -220,19 +228,20 @@ function SideDrower() {
                                         },
                                     }}
                                 >
-                                    {options.map((option) => (
-                                        <MenuItem
-                                            sx={{
-                                                fontSize: "15px",
-                                                // fontWeight:"bold"
-                                            }}
-                                            key={option}
-                                            selected={option === 'My Profile'}
-                                            onClick={() => handleMenuSelect(option)}
-                                        >
-                                            {option}
-                                        </MenuItem>
-                                    ))}
+                                    {
+                                        profileOptions?.map((option) => (
+                                            <MenuItem
+                                                sx={{
+                                                    fontSize: "15px",
+                                                    // fontWeight:"bold"
+                                                }}
+                                                key={option}
+                                                // selected={location.pathname === option.path}
+                                                onClick={() => handleMenuSelect(option.path)}
+                                            >
+                                                {option.text}
+                                            </MenuItem>
+                                        ))}
                                 </Menu>
                             </div>
                         </div>
