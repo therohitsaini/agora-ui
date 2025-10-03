@@ -46,13 +46,12 @@ function SignIn() {
                 body: JSON.stringify(userObject),
             });
             const response = await fetchData.json()
-            console.log("Login response:", response.userData.role)
+            console.log("Login response:", response.massage)
             if (fetchData.ok) {
-
                 localStorage.setItem("user-ID", response.userData._id);
                 localStorage.setItem("access_user", response.data);
                 login(response.data, response.userData);
-                toast.success(response.message || "Login successful!");
+                toast.success(response.massage || "Login successful!");
                 const role = String(response?.userData?.role || '').trim().toLowerCase();
                 console.log("role", role)
                 if (role === 'admin') {
@@ -62,11 +61,11 @@ function SignIn() {
                     navigate("/consultant-dashboard");
                 }
                 else {
-                    navigate("/callapp");
+                    navigate("/home");
                 }
 
             } else {
-                toast.error(response.message || "Login failed!");
+                toast.error(response.massage || "Login failed!");
             }
 
 

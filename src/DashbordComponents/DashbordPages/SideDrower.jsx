@@ -71,7 +71,11 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
         if (option === '/dashboard/profile') {
             navigate('/dashboard/profile');
         }
-      
+        if (option === '/dashboard/logout') {
+            logout();
+            navigate('/');
+        }
+
         if (option === '/consultant-dashboard/logout') {
             logout();
             navigate('/');

@@ -25,6 +25,8 @@ import HomeConsultant from './ConsultantDashboard/Pages/HomeConsultant'
 import ConsultantClients from './ConsultantDashboard/Pages/ConsultantClients'
 import AnalyticsConsultant from './ConsultantDashboard/Pages/AnalyticsConsultant'
 import Profile from './components/Profile'
+import HomeMainWeb from './HomeMain/HomeMainWeb'
+import ConsultantMajorDetails from './components/ConsultantMajorDetails'
 
 function App() {
   return (
@@ -72,6 +74,18 @@ function App() {
                   <ProtectRoute>
                     <AppNavbar />
                   </ProtectRoute>
+                } />
+              <Route path="/home"
+                element={
+                  // <ProtectRoute>
+                    <HomeMainWeb />
+                  // </ProtectRoute>
+                } />
+              <Route path="/consultant-major-details/:id"
+                element={
+                  // <ProtectRoute>
+                  <ConsultantMajorDetails />
+
                 } />
 
 

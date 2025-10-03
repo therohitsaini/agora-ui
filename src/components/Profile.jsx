@@ -10,7 +10,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 
 function Profile() {
-  return (
+   return (
     <Box sx={{ p: 3, color: '#e5e7eb' }}>
       {/* Header Card */}
       <Card sx={{
@@ -186,7 +186,7 @@ function Profile() {
         </Grid>
       </Grid>
     </Box>
-  )
+   )
 }
 
 export default Profile

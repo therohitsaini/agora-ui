@@ -47,7 +47,6 @@ function CallApp() {
   const [localVideoLoaded, setLocalVideoLoaded] = useState(false)
   const [open, setOpen] = useState(false);
   const [userId, seUserId] = useState("");
-  const [userInfoByID, setUserInfoByID] = useState({})
   const [time, setTime] = useState(0);
   const intervalRef = useRef(null);
 
@@ -346,28 +345,7 @@ function CallApp() {
     console.log("Local video track played:", localVideoRef.current);
   }
 
-  const getUserByID = async (id) => {
 
-    try {
-      const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/${id}`;
-      const fetchData = await fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } });
-      const { data } = await fetchData.json();
-      if (fetchData.ok) {
-        setUserInfoByID(data)
-      }
-
-    } catch (error) {
-      console.log("Error fetching user by ID:", error);
-      return null;
-    }
-  }
-  useEffect(() => {
-    const id = localStorage.getItem("user-ID");
-    if (id) {
-      const u = getUserByID(id);
-
-    }
-  }, [])
 
 
   const leaveChannel = async () => {
@@ -430,19 +408,6 @@ function CallApp() {
     }
   }
 
-  // useEffect(() => {
-  //   if (isJoined) {
-  //     intervalRef.current = setInterval(() => {
-  //       setTime(prev => prev + 1);
-  //     }, 1000);
-  //   } else {
-  //     clearInterval(intervalRef.current);
-  //   }
-
-  //   return () => clearInterval(intervalRef.current);
-  // }, [isJoined,]);
-
-
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -499,10 +464,10 @@ function CallApp() {
     );
   }
 
-  const logOutButton = () => {
-    logout();
-    navigator('/');
-  }
+  // const logOutButton = () => {
+  //   logout();
+  //   navigator('/');
+  // }
 
 
 
@@ -544,7 +509,7 @@ function CallApp() {
   return (
     <Fragment>
       <div className="w-full sticky top-0 z-50">
-        <Navbar logOutButton={logOutButton} handleRecharge={handleRecharge} userInfoByID={userInfoByID} />
+        <Navbar  handleRecharge={handleRecharge} />
       </div>
       <AnimatedHero>
 
@@ -655,7 +620,7 @@ function CallApp() {
                           value={uid}
                           onChange={(e) => setUid(e.target.value)}
                           label="Select User"
-                        
+
                         >
                           <MenuItem sx={{ color: "white" }} value="">
                             -- Select a user --

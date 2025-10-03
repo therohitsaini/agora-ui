@@ -9,9 +9,64 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import CallIcon from "@mui/icons-material/Call";
 import { Chip, Paper } from "@mui/material";
 import navLogo from "../assets/image/call-center.png"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useAuth } from "../authProvider/AuthProvider";
 
-function Navbar({ balance, logOutButton, handleRecharge, userInfoByID }) {
+function Navbar({ balance,  handleRecharge, }) {
+
+    const [userInfoByID, setUserInfoByID] = useState({})
+    const [isLoading, setIsLoading] = useState(true)
+    const navigator = useNavigate();
+    const { logout } = useAuth();
+
+    const getUserByID = async (id) => {
+        try {
+            setIsLoading(true);
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/${id}`;
+            const fetchData = await fetch(url, { 
+                method: "GET", 
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('access_user') || ''}`
+                } 
+            });
+            
+            const responseData = await fetchData.json();
+            
+            if (fetchData.ok) {
+                setUserInfoByID(responseData.data || responseData);
+                console.log("User data set:", responseData.data || responseData);
+            } else {
+                console.log("API Error:", responseData);
+                setUserInfoByID({ walletBalance: 0 }); // Fallback
+            }
+
+        } catch (error) {
+            console.log("Error fetching user by ID:", error);
+            setUserInfoByID({ walletBalance: 0 }); // Fallback
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    
+    useEffect(() => {
+        const id = localStorage.getItem("user-ID");
+        console.log("User ID from localStorage:", id);
+        if (id) {
+            getUserByID(id);
+        } else {
+            console.log("No user ID found in localStorage");
+        }
+    }, [])
+    
+  
+
+    const logOutButton = () => {
+        logout();
+        navigator('/');
+    }
 
     return (
         <AppBar position="sticky"
@@ -29,10 +84,9 @@ function Navbar({ balance, logOutButton, handleRecharge, userInfoByID }) {
 
                 <div className="nav-contemt flex gap-10">
                     <ul className="un-order flex items-center gap-5">
-                        <Link to="/callapp"  >Home</Link>
+                        <Link to="/home"  >Home</Link>
                         <Link to="/book-appointment">Service</Link>
                         <li>Home</li>
-
                     </ul>
                     <Box
                         sx={{
@@ -77,7 +131,11 @@ function Navbar({ balance, logOutButton, handleRecharge, userInfoByID }) {
                                     Wallet Balance
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontSize: "12px", fontWeight: "bold", color: "#9fa1a2a9" }}>
-                                    INR: {userInfoByID?.walletBalance}.00 Credits
+                                    {isLoading ? (
+                                        "Loading..."
+                                    ) : (
+                                        `INR: ${userInfoByID?.walletBalance || 0}.00 Credits`
+                                    )}
                                 </Typography>
                             </Box>
 

@@ -7,6 +7,8 @@ import {
     Typography,
     Paper,
     Grid,
+    Autocomplete,
+    Chip,
 } from '@mui/material';
 
 const professions = [
@@ -14,6 +16,9 @@ const professions = [
     { value: 'Lawyer', label: 'Lawyer' },
     { value: 'Therapist', label: 'Therapist' },
 ];
+
+// Free-typed languages; keep empty to allow custom input everywhere
+const languageOptions = [];
 
 export default function AddConsultantForm() {
     const [formData, setFormData] = useState({
@@ -27,11 +32,16 @@ export default function AddConsultantForm() {
         experience: '',
         fees: '',
         bio: '',
+        language: [], // Array to store multiple languages
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleLanguageChange = (event, newValue) => {
+        setFormData(prev => ({ ...prev, language: newValue }));
     };
 
     const handleSubmit = async (e) => {
@@ -54,6 +64,7 @@ export default function AddConsultantForm() {
                 setFormData({
                     fullName: "",
                     email: "",
+                    password: "",
                     phone: "",
                     profession: "",
                     specialization: "",
@@ -61,6 +72,7 @@ export default function AddConsultantForm() {
                     experience: "",
                     fees: "",
                     bio: "",
+                    language: [],
                 });
             } else {
                 alert(data.message || "Something went wrong!");
@@ -70,6 +82,7 @@ export default function AddConsultantForm() {
             alert("Server error, please try again later.");
         }
     };
+
 
     return (
         <div className='w-[100%] h-[80%] flex justify-center items-center'>
@@ -176,11 +189,12 @@ export default function AddConsultantForm() {
                                 InputLabelProps={{ style: { color: '#040404' } }}
                                 inputProps={{ style: { color: '#282727' } }}
                             >
-                                {professions.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
-                                ))}
+                                {
+                                    professions.map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
                             </TextField>
                         </Grid>
 
@@ -258,6 +272,59 @@ export default function AddConsultantForm() {
                             />
                         </Grid>
 
+                    </div>
+                    <div className='flex  gap-2 '>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                multiple
+                                fullWidth
+                                id="language-select"
+                                options={languageOptions}
+                                value={formData.language}
+                                onChange={handleLanguageChange}
+                                freeSolo
+                                selectOnFocus
+                                clearOnBlur
+                                handleHomeEndKeys
+                                width="100%"
+                                renderTags={(value, getTagProps) =>
+                                    value.map((option, index) => (
+                                        <Chip
+                                            size="small"
+                                            variant="outlined"
+                                            label={option}
+                                            {...getTagProps({ index })}
+                                            key={option}
+                                            sx={{
+
+                                                backgroundColor: '#eef2ff',
+                                                color: '#3730a3',
+                                                border: '1px solid #3730a3',
+                                                '& .MuiChip-deleteIcon': {
+                                                    color: '#3730a3',
+                                                },
+                                            }}
+                                        />
+                                    ))
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Languages"
+                                        placeholder="Type and press Enter"
+                                        sx={{
+                                            width: "250px"
+                                        }}
+                                        size='small'
+                                        InputLabelProps={{ style: { color: '#040404' } }}
+                                        inputProps={{
+                                            ...params.inputProps,
+                                            style: { color: '#282727' }
+                                        }}
+                                    />
+                                )}
+                            />
+                        </Grid>
                     </div>
                     <div >
                         <Grid item xs={12}>
