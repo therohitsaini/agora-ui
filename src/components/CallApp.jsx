@@ -471,45 +471,12 @@ function CallApp() {
 
 
 
-  const handleRecharge = async () => {
-    const url = `${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/create-order`
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amountINR: 1, userId })
-    });
-    const data = await res.json();
-    const order = data.order;
-
-    console.log("TEXT", order)
-    // if()
-    const options = {
-      key: "rzp_test_RJ31PhSmp5nbLQ",
-      amount: order?.amount,
-      currency: order?.currency,
-      name: "My Calling App",
-      description: "Wallet Recharge",
-      order_id: order?.id,
-      handler: async function (response) {
-
-        await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/verify-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...response, userId, amountINR: 1 })
-        });
-        alert("Recharge Success! Refresh wallet balance.");
-      },
-      // prefill: { name: currentUser?.name, email: currentUser?.email, contact: "9999999999" }
-    };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  };
 
 
   return (
     <Fragment>
       <div className="w-full sticky top-0 z-50">
-        <Navbar  handleRecharge={handleRecharge} />
+        <Navbar   />
       </div>
       <AnimatedHero>
 

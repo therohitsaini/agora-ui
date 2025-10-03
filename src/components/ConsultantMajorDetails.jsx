@@ -246,7 +246,7 @@ console.log("consultant__________", consultantByID)
                </Grid>
 
                <Grid item xs={12} md={4}>
-                  <Card sx={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: 3 }}>
+                  {/* <Card sx={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: 3 }}>
                      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
                         <Typography variant="h6" sx={{ color: '#f8fafc', mb: 1.5 }}>Check Similar Consultants</Typography>
                         <List>
@@ -270,7 +270,7 @@ console.log("consultant__________", consultantByID)
                            ))}
                         </List>
                      </CardContent>
-                  </Card>
+                  </Card> */}
 
                   <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: 3 }}>
                      <CardContent sx={{ p: { xs: 2, md: 3 } }}>

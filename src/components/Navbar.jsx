@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useAuth } from "../authProvider/AuthProvider";
 
-function Navbar({ balance,  handleRecharge, }) {
+function Navbar() {
 
     const [userInfoByID, setUserInfoByID] = useState({})
     const [isLoading, setIsLoading] = useState(true)
@@ -25,16 +25,16 @@ function Navbar({ balance,  handleRecharge, }) {
         try {
             setIsLoading(true);
             const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/${id}`;
-            const fetchData = await fetch(url, { 
-                method: "GET", 
-                headers: { 
+            const fetchData = await fetch(url, {
+                method: "GET",
+                headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem('access_user') || ''}`
-                } 
+                }
             });
-            
+
             const responseData = await fetchData.json();
-            
+
             if (fetchData.ok) {
                 setUserInfoByID(responseData.data || responseData);
                 console.log("User data set:", responseData.data || responseData);
@@ -50,7 +50,7 @@ function Navbar({ balance,  handleRecharge, }) {
             setIsLoading(false);
         }
     }
-    
+
     useEffect(() => {
         const id = localStorage.getItem("user-ID");
         console.log("User ID from localStorage:", id);
@@ -60,8 +60,42 @@ function Navbar({ balance,  handleRecharge, }) {
             console.log("No user ID found in localStorage");
         }
     }, [])
-    
-  
+
+    const handleRecharge = async () => {
+        const url = `${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/create-order`
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amountINR: 1, userId })
+        });
+        const data = await res.json();
+        const order = data.order;
+
+        console.log("TEXT", order)
+        // if()
+        const options = {
+            key: "rzp_test_RJ31PhSmp5nbLQ",
+            amount: order?.amount,
+            currency: order?.currency,
+            name: "My Calling App",
+            description: "Wallet Recharge",
+            order_id: order?.id,
+            handler: async function (response) {
+
+                await fetch(`${import.meta.env.VITE_BACK_END_URL}/api/razerpay-create-order/verify-payment`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...response, userId, amountINR: 1 })
+                });
+                alert("Recharge Success! Refresh wallet balance.");
+            },
+            // prefill: { name: currentUser?.name, email: currentUser?.email, contact: "9999999999" }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    };
+
+
 
     const logOutButton = () => {
         logout();
