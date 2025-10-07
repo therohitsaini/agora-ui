@@ -50,7 +50,7 @@ function DashbordHome() {
             {/* Sidebar + Main Content */}
             <div className="flex flex-1 overflow-hidden ">
                 {/* Sidebar */}
-                <div className="w-60 bg-[#050505f3] text-white flex-shrink-0 -mt-10 border border-blue-700">
+                <div className="w-60 bg-[#050505f3] text-white flex-shrink-0 -mt-10 ">
                     <SideDrower profileOptions={profileOptions} />
                 </div>
 
