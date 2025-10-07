@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 // Socket connection
-const socket = io("http://localhost:3001"); // backend URL
+const socket = io(`${import.meta.env.VITE_BACK_END_URL}`); // backend URL
 
 function CallNotification() {
    const [incomingCall, setIncomingCall] = useState(null);
@@ -11,7 +11,7 @@ function CallNotification() {
 
    // 1️⃣ Connect & register
    useEffect(() => {
-      const myUserId = localStorage.getItem("user-ID") || "user1"; // apni ID
+      const myUserId = localStorage.getItem("user-ID") // apni ID
       localStorage.setItem("user-ID", myUserId);
 
       socket.on("connect", () => {

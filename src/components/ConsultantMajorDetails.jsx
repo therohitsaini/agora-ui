@@ -29,9 +29,11 @@ import MessageIcon from '@mui/icons-material/Message'
 import PeopleIcon from '@mui/icons-material/People'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Navbar from './Navbar'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { allUserDetailsContext } from '../DashbordComponents/ApiContext/ApiContextUserData'
 import { useEffect } from 'react'
+import { io } from 'socket.io-client'
+import { toast } from 'react-toastify'
 
 function StatRow({ label, value, color = '#10b981' }) {
    return (
@@ -57,7 +59,9 @@ function StatRow({ label, value, color = '#10b981' }) {
 function ConsultantMajorDetails() {
    const [isFav, setIsFav] = useState(false)
    const [consultantByID, setConsultantByID] = useState([])
+   const [socket, setSocket] = useState(null)
    const { id } = useParams()
+   const navigate = useNavigate()
    console.log("id", id)
 
    const getConsultantByID = async (id) => {
@@ -88,6 +92,51 @@ function ConsultantMajorDetails() {
       getConsultantByID(id);
    }, [id])
 
+   // setup socket for caller
+   useEffect(() => {
+      const backendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
+      const s = io(backendUrl, {
+         transports: ['websocket', 'polling'],
+         reconnection: true,
+         reconnectionAttempts: 10,
+         reconnectionDelay: 1000,
+         withCredentials: true,
+      })
+      setSocket(s)
+      const callerId = localStorage.getItem('user-ID')
+      if (callerId) s.emit('register', callerId)
+
+      s.on('connect_error', (err) => {
+         console.log('socket connect_error', err?.message)
+      })
+      s.on('error', (err) => {
+         console.log('socket error', err)
+      })
+
+      s.on('call-accepted', (payload) => {
+         const type = payload.type
+         const channel = payload.channelName
+         const uid = localStorage.getItem('user-ID')
+         const consultantId = payload.fromUid || id
+         navigate(`/video-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
+      })
+
+      s.on('call-rejected', () => toast.error('Call rejected'))
+
+      return () => s.disconnect()
+   }, [id])
+
+   const startVideoCall = () => {
+      if (!socket) { toast.error('No connection'); return }
+      if (!id) { toast.error('Consultant missing'); return }
+      const fromUid = localStorage.getItem('user-ID')
+      if (!fromUid) { toast.error('Login required'); return }
+      const ts = Date.now().toString().slice(-8)
+      const channelName = `call${fromUid.slice(-6)}${id.slice(-6)}${ts}`
+      const data = { toUid: id, fromUid, type: 'video', channelName }
+      socket.emit('call-user', data)
+      toast.info('Calling...')
+   }
 console.log("consultant__________", consultantByID)
 
    const consultant = {
@@ -187,7 +236,7 @@ console.log("consultant__________", consultantByID)
                               borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2,
                               '&:hover': { borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)' }
                            }}>Voice Call</Button>
-                           <Button fullWidth startIcon={<VideocamIcon />} variant="outlined" sx={{
+                           <Button fullWidth startIcon={<VideocamIcon />} variant="outlined" onClick={startVideoCall} sx={{
                               borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2,
                               '&:hover': { borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)' }
                            }}>Video Call</Button>

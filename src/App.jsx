@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import CallApp from './components/CallApp'
+
 import SignIn from './Auth/SignIn'
 import SignUp from './Auth/SignUp'
 import CallNotification from './components/CallNotification'
@@ -27,6 +27,7 @@ import AnalyticsConsultant from './ConsultantDashboard/Pages/AnalyticsConsultant
 import Profile from './components/Profile'
 import HomeMainWeb from './HomeMain/HomeMainWeb'
 import ConsultantMajorDetails from './components/ConsultantMajorDetails'
+import CallPage from './components/CallPage'
 
 function App() {
   return (
@@ -49,13 +50,13 @@ function App() {
                   </PublicRoute>
                 }
               />
-              <Route
+              {/* <Route
                 path="/callapp"
                 element={
                   <ProtectRoute>
                     <CallApp />
                   </ProtectRoute>
-                } />
+                } /> */}
 
               <Route path="/callnotification"
                 element={
@@ -87,6 +88,11 @@ function App() {
                   <ConsultantMajorDetails />
 
                 } />
+
+            <Route
+              path="/video-call"
+              element={<CallPage />}
+            />
 
 
               <Route path="/dashboard"
