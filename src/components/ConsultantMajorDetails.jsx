@@ -246,10 +246,10 @@ function ConsultantMajorDetails() {
                         </Grid>
 
                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
-                           <Button fullWidth startIcon={<HeadsetMicIcon />} variant="contained" sx={{
+                           <Button fullWidth disabled startIcon={<HeadsetMicIcon />} variant="contained" sx={{
                               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                               textTransform: 'none', fontWeight: 700, borderRadius: 2
-                           }}>Start Chat</Button>
+                           }}>Coming Soon</Button>
                            <Button fullWidth startIcon={<CallIcon />} variant="outlined" onClick={startVoiceCall} sx={{
                               borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2,
                               '&:hover': { borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)' }

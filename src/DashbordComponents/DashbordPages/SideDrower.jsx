@@ -85,7 +85,7 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
 
     return (
         <Fragment>
-            <div className='side-bar flex flex-col justify-between h-full'>
+            <div className='side-bar flex flex-col justify-between h-full '>
                 <Box>
                     <List sx={{ mt: 10, px: "10px" }}>
                         {
@@ -156,7 +156,7 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
                             ))}
                     </List>
 
-                    <Box
+                    {/* <Box
                         sx={{
                             backgroundColor: "#1e293b",
                             p: 2,
@@ -186,13 +186,13 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
                         >
                             Get the discount
                         </Button>
-                    </Box>
+                    </Box> */}
                 </Box>
-                <div>
-                    <Divider sx={{ borderColor: "#334155" }} />
+                <div className=''>
+                    <Divider  sx={{ borderColor: "#334155" }} />
                     <div className='flex gap-4 '>
                         <Box display="flex" alignItems="center" p={1.5}>
-                            <Avatar src={user?.avatar || "/avatar.png"} />
+                            <Avatar src={user?.avatar || ""} />
                             <Box ml={1.5} flexGrow={1}>
                                 <Typography fontWeight="bold" fontSize={14}>
                                     {user?.name || user?.username || "User"}
@@ -223,7 +223,7 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
                                     slotProps={{
                                         paper: {
                                             style: {
-                                                maxHeight: ITEM_HEIGHT * 4.5,
+                                                // maxHeight: ITEM_HEIGHT * 4.5,
                                                 width: '20ch',
                                             },
                                         },

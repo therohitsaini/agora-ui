@@ -43,14 +43,14 @@ function DashbordHome() {
     return (
         <div className="h-screen flex flex-col">
             {/* Top AppBar */}
-            <div className="sticky top-0 z-50">
+            <div className="sticky top-0 z-50 ">
                 <AppBarDashbord />
             </div>
 
             {/* Sidebar + Main Content */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden ">
                 {/* Sidebar */}
-                <div className="w-60 bg-[#050505f3] text-white flex-shrink-0 -mt-10">
+                <div className="w-60 bg-[#050505f3] text-white flex-shrink-0 -mt-10 border border-blue-700">
                     <SideDrower profileOptions={profileOptions} />
                 </div>
 
