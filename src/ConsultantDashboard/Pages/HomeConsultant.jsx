@@ -6,6 +6,7 @@ import { PageViewsBarChart } from '../../Charts/SparklineChart'
 import DataGridTable from '../../components/DataGridTable'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
+import IncomingCallPopup from '../../components/IncomingCallPopup'
 
 function HomeConsultant() {
    const [socket, setSocket] = useState(null)
@@ -30,16 +31,16 @@ function HomeConsultant() {
       return () => s.disconnect()
    }, [])
 
-   const accept =async () => {
+   const accept = async () => {
       if (!socket || !incoming) return
       const fromUid = localStorage.getItem('user-ID')
       socket.emit('call-accepted', { toUid: incoming.fromUid, fromUid, type: incoming.type, channelName: incoming.channelName })
-      
+
       // Navigate to appropriate call page based on type
       if (incoming.type === 'voice') {
-        await navigate(`/voice-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
+         await navigate(`/voice-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
       } else {
-        await navigate(`/video-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
+         await navigate(`/video-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
       }
       setIncoming(null)
    }
@@ -47,21 +48,16 @@ function HomeConsultant() {
    const reject = () => {
       if (!socket || !incoming) return
       const fromUid = localStorage.getItem('user-ID')
-      socket.emit('call-rejected', { toUid: incoming.fromUid, fromUid, channelName: incoming.channelName })
+      socket.emit('call-rejected', { toUid: incoming.fromUid, fromUid, channelName: incoming.channelName, reason: 'Call rejected by consultant' })
       setIncoming(null)
    }
 
    return (
       <Fragment>
-        {incoming && (
-          <div className='fixed top-4 right-4 z-50 bg-[#1f2937] border border-[#334155] rounded p-3 text-white'>
-            <div className='mb-2'>Incoming {incoming.type} call</div>
-            <div className='flex gap-2'>
-              <button onClick={accept} className='px-3 py-1 rounded bg-green-600'>Accept</button>
-              <button onClick={reject} className='px-3 py-1 rounded bg-red-600'>Reject</button>
-            </div>
-          </div>
-        )}
+         {
+            incoming && (
+               <IncomingCallPopup incoming={incoming} accept={accept} reject={reject} />
+            )}
          <Overview cardData={cardData} />
          <div className='flex gap-5 mt-5 my-5'>
             <SessionsChart />

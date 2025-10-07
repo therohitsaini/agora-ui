@@ -31,9 +31,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Navbar from './Navbar'
 import { useParams, useNavigate } from 'react-router-dom'
 import { allUserDetailsContext } from '../DashbordComponents/ApiContext/ApiContextUserData'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
-import { toast } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 
 function StatRow({ label, value, color = '#10b981' }) {
    return (
@@ -60,6 +60,7 @@ function ConsultantMajorDetails() {
    const [isFav, setIsFav] = useState(false)
    const [consultantByID, setConsultantByID] = useState([])
    const [socket, setSocket] = useState(null)
+   const callingToastRef = useRef(null)
    const { id } = useParams()
    const navigate = useNavigate()
    console.log("id", id)
@@ -118,6 +119,11 @@ function ConsultantMajorDetails() {
          const channel = payload.channelName
          const uid = localStorage.getItem('user-ID')
          const consultantId = payload.fromUid || id
+         // Dismiss any calling toast
+         if (callingToastRef.current) {
+            try { toast.dismiss(callingToastRef.current) } catch {}
+            callingToastRef.current = null
+         }
          if (type === 'voice') {
             navigate(`/voice-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
          } else if (type === 'video') {
@@ -127,7 +133,15 @@ function ConsultantMajorDetails() {
          }
       })
 
-      s.on('call-rejected', () => toast.error('Call rejected'))
+      s.on('call-rejected', (payload) => {
+         // Dismiss any calling toast
+         if (callingToastRef.current) {
+            try { toast.dismiss(callingToastRef.current) } catch {}
+            callingToastRef.current = null
+         }
+         const reason = payload?.reason || 'reject the call'
+         toast.error(reason)
+      })
 
       return () => s.disconnect()
    }, [id])
@@ -141,7 +155,7 @@ function ConsultantMajorDetails() {
       const channelName = `call${fromUid.slice(-6)}${id.slice(-6)}${ts}`
       const data = { toUid: id, fromUid, type: 'video', channelName }
       socket.emit('call-user', data)
-      toast.info('Calling...')
+      try { callingToastRef.current = toast.loading('Calling consultant...') } catch {}
    }
 
    const startVoiceCall = () => {
@@ -153,7 +167,7 @@ function ConsultantMajorDetails() {
       const channelName = `voice${fromUid.slice(-6)}${id.slice(-6)}${ts}`
       const data = { toUid: id, fromUid, type: 'voice', channelName }
       socket.emit('call-user', data)
-      toast.info('Calling...')
+      try { callingToastRef.current = toast.loading('Calling consultant...') } catch {}
    }
 
 
@@ -182,6 +196,7 @@ function ConsultantMajorDetails() {
    return (
       <div className='w-full h-full'>
          <Navbar />
+         <ToastContainer />
          <Box sx={{
             minHeight: '100vh',
             px: { xs: 2, md: 3 },

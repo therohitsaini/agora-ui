@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import AgoraRTC from 'agora-rtc-sdk-ng'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { io } from 'socket.io-client'
 
 function VoiceCallPage() {
   const [searchParams] = useSearchParams()
@@ -22,6 +23,8 @@ function VoiceCallPage() {
   const clientRef = useRef(null)
   const localTracksRef = useRef([])
   const remoteUsersRef = useRef(new Map())
+  const handlersRef = useRef({})
+  const socketRef = useRef(null)
 
   const [isJoining, setIsJoining] = useState(false)
   const [isJoined, setIsJoined] = useState(false)
@@ -126,19 +129,25 @@ function VoiceCallPage() {
       const client = RTC.createClient({ mode: 'rtc', codec: 'vp8' })
       clientRef.current = client
 
-      client.on('user-published', async (user, mediaType) => {
+      const onUserPublished = async (user, mediaType) => {
         await client.subscribe(user, mediaType)
         if (mediaType === 'audio') {
           user.audioTrack?.play()
         }
         remoteUsersRef.current.set(user.uid, user)
-      })
-      client.on('user-unpublished', (user) => {
+      }
+      const onUserUnpublished = (user) => {
+        try { user.audioTrack?.stop() } catch {}
         remoteUsersRef.current.delete(user.uid)
-      })
-      client.on('user-left', (user) => {
+      }
+      const onUserLeft = (user) => {
+        try { user.audioTrack?.stop() } catch {}
         remoteUsersRef.current.delete(user.uid)
-      })
+      }
+      handlersRef.current = { onUserPublished, onUserUnpublished, onUserLeft }
+      client.on('user-published', onUserPublished)
+      client.on('user-unpublished', onUserUnpublished)
+      client.on('user-left', onUserLeft)
 
       await client.join(appId, channelName, token, uid)
 
@@ -170,11 +179,38 @@ function VoiceCallPage() {
 
   async function teardown(noNavigate = false) {
     try {
+      const client = clientRef.current
+      // Unpublish local tracks so peers stop receiving
+      if (client && localTracksRef.current.length) {
+        try { await client.unpublish(localTracksRef.current.filter(Boolean)) } catch {}
+      }
+      // Stop and close local tracks
       for (const t of localTracksRef.current) {
-        try { t.stop && t.stop(); t.close && t.close() } catch { }
+        try { t.stop && t.stop() } catch {}
+        try { t.close && t.close() } catch {}
       }
       localTracksRef.current = []
-      await clientRef.current?.leave()
+
+      // Stop remote audio
+      remoteUsersRef.current.forEach((user) => {
+        try { user.audioTrack?.stop() } catch {}
+      })
+      remoteUsersRef.current.clear()
+
+      // Detach event listeners
+      if (client && handlersRef.current) {
+        const { onUserPublished, onUserUnpublished, onUserLeft } = handlersRef.current
+        try { client.off('user-published', onUserPublished) } catch {}
+        try { client.off('user-unpublished', onUserUnpublished) } catch {}
+        try { client.off('user-left', onUserLeft) } catch {}
+        try { client.removeAllListeners && client.removeAllListeners() } catch {}
+      }
+
+      // Leave channel last
+      if (client) {
+        try { await client.leave() } catch {}
+        clientRef.current = null
+      }
     } finally {
       setIsJoined(false)
       if (!noNavigate) navigate(-1)
@@ -182,6 +218,13 @@ function VoiceCallPage() {
   }
 
   async function leave() {
+    try {
+      const s = socketRef.current
+      const fromUid = localStorage.getItem('user-ID')
+      if (s && fromUid) {
+        s.emit('call-ended', { toUid: consultantId || undefined, fromUid, channelName })
+      }
+    } catch {}
     await teardown(false)
   }
 
@@ -210,10 +253,26 @@ function VoiceCallPage() {
   }
 
   useEffect(() => {
+    // Setup socket to coordinate hangups
+    const backendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
+    const s = io(backendUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      withCredentials: true,
+    })
+    socketRef.current = s
+    const me = localStorage.getItem('user-ID')
+    if (me) s.emit('register', me)
+    s.on('call-ended', async () => {
+      await teardown(false)
+    })
+
     // small delay so everything mounts
     const t = setTimeout(() => { join() }, 300)
     // On unmount, clean up media but DO NOT navigate automatically
-    return () => { clearTimeout(t); teardown(true) }
+    return () => { clearTimeout(t); try { s.disconnect() } catch {}; teardown(true) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -246,7 +305,7 @@ function VoiceCallPage() {
 
         {/* Voice Call Visual */}
         <div className="relative mb-8">
-          <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl">
+          <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to purple-600 rounded-full flex items-center justify-center shadow-2xl">
             <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>

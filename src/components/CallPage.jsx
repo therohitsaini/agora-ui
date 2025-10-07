@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import AgoraRTC from 'agora-rtc-sdk-ng'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { io } from 'socket.io-client'
 
 function CallPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const callType = searchParams.get('type') || 'video'
   const channelName = searchParams.get('channel') || ''
+  const consultantId = searchParams.get('consultantId') || ''
   // Use a numeric Agora RTC UID. If URL uid is not numeric, generate one per session.
   const uid = useMemo(() => {
     const urlUid = Number(searchParams.get('uid'))
@@ -23,6 +25,8 @@ function CallPage() {
   const remoteUsersRef = useRef(new Map())
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
+  const handlersRef = useRef({})
+  const socketRef = useRef(null)
 
   const [isJoining, setIsJoining] = useState(false)
   const [isJoined, setIsJoined] = useState(false)
@@ -127,7 +131,7 @@ function CallPage() {
       const client = RTC.createClient({ mode: 'rtc', codec: 'vp8' })
       clientRef.current = client
 
-      client.on('user-published', async (user, mediaType) => {
+      const onUserPublished = async (user, mediaType) => {
         await client.subscribe(user, mediaType)
         if (mediaType === 'video') {
           user.videoTrack?.play(remoteVideoRef.current)
@@ -136,13 +140,22 @@ function CallPage() {
           user.audioTrack?.play()
         }
         remoteUsersRef.current.set(user.uid, user)
-      })
-      client.on('user-unpublished', (user) => {
+      }
+      const onUserUnpublished = (user) => {
+        // stop any playing tracks
+        try { user.videoTrack?.stop() } catch {}
+        try { user.audioTrack?.stop() } catch {}
         remoteUsersRef.current.delete(user.uid)
-      })
-      client.on('user-left', (user) => {
+      }
+      const onUserLeft = (user) => {
+        try { user.videoTrack?.stop() } catch {}
+        try { user.audioTrack?.stop() } catch {}
         remoteUsersRef.current.delete(user.uid)
-      })
+      }
+      handlersRef.current = { onUserPublished, onUserUnpublished, onUserLeft }
+      client.on('user-published', onUserPublished)
+      client.on('user-unpublished', onUserUnpublished)
+      client.on('user-left', onUserLeft)
 
       await client.join(appId, channelName, token, uid)
 
@@ -181,11 +194,49 @@ function CallPage() {
 
   async function teardown(noNavigate = false) {
     try {
+      const client = clientRef.current
+      // Unpublish local tracks first so peers stop receiving
+      if (client && localTracksRef.current.length) {
+        try { await client.unpublish(localTracksRef.current.filter(Boolean)) } catch {}
+      }
+      // Stop and close local tracks
       for (const t of localTracksRef.current) {
-        try { t.stop && t.stop(); t.close && t.close() } catch { }
+        try { t.stop && t.stop() } catch {}
+        try { t.close && t.close() } catch {}
       }
       localTracksRef.current = []
-      await clientRef.current?.leave()
+
+      // Stop all remote tracks currently playing
+      remoteUsersRef.current.forEach((user) => {
+        try { user.videoTrack?.stop() } catch {}
+        try { user.audioTrack?.stop() } catch {}
+      })
+      remoteUsersRef.current.clear()
+
+      // Detach event listeners
+      if (client && handlersRef.current) {
+        const { onUserPublished, onUserUnpublished, onUserLeft } = handlersRef.current
+        try { client.off('user-published', onUserPublished) } catch {}
+        try { client.off('user-unpublished', onUserUnpublished) } catch {}
+        try { client.off('user-left', onUserLeft) } catch {}
+        try { client.removeAllListeners && client.removeAllListeners() } catch {}
+      }
+
+      // Clear DOM video elements
+      if (remoteVideoRef.current) {
+        try { remoteVideoRef.current.srcObject = null } catch {}
+        try { remoteVideoRef.current.innerHTML = '' } catch {}
+      }
+      if (localVideoRef.current) {
+        try { localVideoRef.current.srcObject = null } catch {}
+        try { localVideoRef.current.innerHTML = '' } catch {}
+      }
+
+      // Finally leave the channel
+      if (client) {
+        try { await client.leave() } catch {}
+        clientRef.current = null
+      }
     } finally {
       setIsJoined(false)
       if (!noNavigate) navigate(-1)
@@ -193,6 +244,13 @@ function CallPage() {
   }
 
   async function leave() {
+    try {
+      const s = socketRef.current
+      const fromUid = localStorage.getItem('user-ID')
+      if (s && fromUid) {
+        s.emit('call-ended', { toUid: consultantId || undefined, fromUid, channelName })
+      }
+    } catch {}
     await teardown(false)
   }
 
@@ -214,11 +272,31 @@ function CallPage() {
   }
 
   useEffect(() => {
+    // Setup socket to coordinate hangups
+    const backendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
+    const s = io(backendUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      withCredentials: true,
+    })
+    socketRef.current = s
+    const me = localStorage.getItem('user-ID')
+    if (me) s.emit('register', me)
+    s.on('call-ended', async () => {
+      await teardown(false)
+    })
+
     // small delay so video elements mount
     const t = setTimeout(() => { join() }, 300)
     // On unmount, clean up media but DO NOT navigate automatically
-    return () => { clearTimeout(t); teardown(true) }
+    return () => { clearTimeout(t); try { s.disconnect() } catch {}; teardown(true) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    // no-op: kept for parity if future side-effects are needed
   }, [])
 
   return (
