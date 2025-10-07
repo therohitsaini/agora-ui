@@ -118,7 +118,13 @@ function ConsultantMajorDetails() {
          const channel = payload.channelName
          const uid = localStorage.getItem('user-ID')
          const consultantId = payload.fromUid || id
-         navigate(`/video-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
+         
+         // Navigate to appropriate call page based on type
+         if (type === 'voice') {
+            navigate(`/voice-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
+         } else {
+            navigate(`/video-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
+         }
       })
 
       s.on('call-rejected', () => toast.error('Call rejected'))
@@ -137,7 +143,19 @@ function ConsultantMajorDetails() {
       socket.emit('call-user', data)
       toast.info('Calling...')
    }
-console.log("consultant__________", consultantByID)
+
+   const startVoiceCall = () => {
+      if (!socket) { toast.error('No connection'); return }
+      if (!id) { toast.error('Consultant missing'); return }
+      const fromUid = localStorage.getItem('user-ID')
+      if (!fromUid) { toast.error('Login required'); return }
+      const ts = Date.now().toString().slice(-8)
+      const channelName = `voice${fromUid.slice(-6)}${id.slice(-6)}${ts}`
+      const data = { toUid: id, fromUid, type: 'voice', channelName }
+      socket.emit('call-user', data)
+      toast.info('Calling...')
+   }
+
 
    const consultant = {
       name: 'Advit Sharma',
@@ -232,7 +250,7 @@ console.log("consultant__________", consultantByID)
                               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                               textTransform: 'none', fontWeight: 700, borderRadius: 2
                            }}>Start Chat</Button>
-                           <Button fullWidth startIcon={<CallIcon />} variant="outlined" sx={{
+                           <Button fullWidth startIcon={<CallIcon />} variant="outlined" onClick={startVoiceCall} sx={{
                               borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2,
                               '&:hover': { borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)' }
                            }}>Voice Call</Button>

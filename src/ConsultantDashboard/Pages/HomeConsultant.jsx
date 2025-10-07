@@ -34,7 +34,13 @@ function HomeConsultant() {
       if (!socket || !incoming) return
       const fromUid = localStorage.getItem('user-ID')
       socket.emit('call-accepted', { toUid: incoming.fromUid, fromUid, type: incoming.type, channelName: incoming.channelName })
-     await navigate(`/video-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
+      
+      // Navigate to appropriate call page based on type
+      if (incoming.type === 'voice') {
+        await navigate(`/voice-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
+      } else {
+        await navigate(`/video-call?type=${incoming.type}&channel=${incoming.channelName}&uid=${fromUid}&consultantId=${incoming.fromUid}`)
+      }
       setIncoming(null)
    }
 

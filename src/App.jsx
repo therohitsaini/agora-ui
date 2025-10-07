@@ -28,6 +28,7 @@ import Profile from './components/Profile'
 import HomeMainWeb from './HomeMain/HomeMainWeb'
 import ConsultantMajorDetails from './components/ConsultantMajorDetails'
 import CallPage from './components/CallPage'
+import VoiceCallPage from './components/VoiceCallPage'
 
 function App() {
   return (
@@ -92,6 +93,10 @@ function App() {
             <Route
               path="/video-call"
               element={<CallPage />}
+            />
+            <Route
+              path="/voice-call"
+              element={<VoiceCallPage />}
             />
 
 
