@@ -76,7 +76,7 @@ function ConsultantMajorDetails() {
             headers: { "Content-Type": "application/json" }
          });
          const { consultant } = await res.json();
-    
+
          if (res.ok) {
             setConsultantByID(consultant);
          }
@@ -118,12 +118,12 @@ function ConsultantMajorDetails() {
          const channel = payload.channelName
          const uid = localStorage.getItem('user-ID')
          const consultantId = payload.fromUid || id
-         
-         // Navigate to appropriate call page based on type
          if (type === 'voice') {
             navigate(`/voice-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
-         } else {
+         } else if (type === 'video') {
             navigate(`/video-call?type=${type}&channel=${channel}&uid=${uid}&consultantId=${consultantId}`)
+         } else {
+            toast.error('Invalid call type')
          }
       })
 
