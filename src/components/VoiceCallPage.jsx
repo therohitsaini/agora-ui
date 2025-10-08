@@ -180,18 +180,18 @@ function VoiceCallPage() {
   async function teardown(noNavigate = false) {
     try {
       const client = clientRef.current
-      // Unpublish local tracks so peers stop receiving
+
       if (client && localTracksRef.current.length) {
         try { await client.unpublish(localTracksRef.current.filter(Boolean)) } catch {}
       }
-      // Stop and close local tracks
+ 
       for (const t of localTracksRef.current) {
         try { t.stop && t.stop() } catch {}
         try { t.close && t.close() } catch {}
       }
       localTracksRef.current = []
 
-      // Stop remote audio
+ 
       remoteUsersRef.current.forEach((user) => {
         try { user.audioTrack?.stop() } catch {}
       })
@@ -206,7 +206,7 @@ function VoiceCallPage() {
         try { client.removeAllListeners && client.removeAllListeners() } catch {}
       }
 
-      // Leave channel last
+ 
       if (client) {
         try { await client.leave() } catch {}
         clientRef.current = null

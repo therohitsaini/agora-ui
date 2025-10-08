@@ -59,7 +59,7 @@ function CallPage() {
         const parsed = JSON.parse(val)
         const candidate = extractJwtFromObject(parsed)
         if (candidate && jwtRegex.test(candidate)) return candidate
-      } catch {}
+      } catch { }
     }
     return ''
   }
@@ -72,7 +72,7 @@ function CallPage() {
         const parsed = JSON.parse(rawAccessUser)
         const t = extractJwtFromObject(parsed)
         if (t) return t
-      } catch {}
+      } catch { }
     }
     const direct = (
       localStorage.getItem('accessToken') ||
@@ -143,13 +143,13 @@ function CallPage() {
       }
       const onUserUnpublished = (user) => {
         // stop any playing tracks
-        try { user.videoTrack?.stop() } catch {}
-        try { user.audioTrack?.stop() } catch {}
+        try { user.videoTrack?.stop() } catch { }
+        try { user.audioTrack?.stop() } catch { }
         remoteUsersRef.current.delete(user.uid)
       }
       const onUserLeft = (user) => {
-        try { user.videoTrack?.stop() } catch {}
-        try { user.audioTrack?.stop() } catch {}
+        try { user.videoTrack?.stop() } catch { }
+        try { user.audioTrack?.stop() } catch { }
         remoteUsersRef.current.delete(user.uid)
       }
       handlersRef.current = { onUserPublished, onUserUnpublished, onUserLeft }
@@ -197,44 +197,44 @@ function CallPage() {
       const client = clientRef.current
       // Unpublish local tracks first so peers stop receiving
       if (client && localTracksRef.current.length) {
-        try { await client.unpublish(localTracksRef.current.filter(Boolean)) } catch {}
+        try { await client.unpublish(localTracksRef.current.filter(Boolean)) } catch { }
       }
       // Stop and close local tracks
       for (const t of localTracksRef.current) {
-        try { t.stop && t.stop() } catch {}
-        try { t.close && t.close() } catch {}
+        try { t.stop && t.stop() } catch { }
+        try { t.close && t.close() } catch { }
       }
       localTracksRef.current = []
 
       // Stop all remote tracks currently playing
       remoteUsersRef.current.forEach((user) => {
-        try { user.videoTrack?.stop() } catch {}
-        try { user.audioTrack?.stop() } catch {}
+        try { user.videoTrack?.stop() } catch { }
+        try { user.audioTrack?.stop() } catch { }
       })
       remoteUsersRef.current.clear()
 
       // Detach event listeners
       if (client && handlersRef.current) {
         const { onUserPublished, onUserUnpublished, onUserLeft } = handlersRef.current
-        try { client.off('user-published', onUserPublished) } catch {}
-        try { client.off('user-unpublished', onUserUnpublished) } catch {}
-        try { client.off('user-left', onUserLeft) } catch {}
-        try { client.removeAllListeners && client.removeAllListeners() } catch {}
+        try { client.off('user-published', onUserPublished) } catch { }
+        try { client.off('user-unpublished', onUserUnpublished) } catch { }
+        try { client.off('user-left', onUserLeft) } catch { }
+        try { client.removeAllListeners && client.removeAllListeners() } catch { }
       }
 
       // Clear DOM video elements
       if (remoteVideoRef.current) {
-        try { remoteVideoRef.current.srcObject = null } catch {}
-        try { remoteVideoRef.current.innerHTML = '' } catch {}
+        try { remoteVideoRef.current.srcObject = null } catch { }
+        try { remoteVideoRef.current.innerHTML = '' } catch { }
       }
       if (localVideoRef.current) {
-        try { localVideoRef.current.srcObject = null } catch {}
-        try { localVideoRef.current.innerHTML = '' } catch {}
+        try { localVideoRef.current.srcObject = null } catch { }
+        try { localVideoRef.current.innerHTML = '' } catch { }
       }
 
       // Finally leave the channel
       if (client) {
-        try { await client.leave() } catch {}
+        try { await client.leave() } catch { }
         clientRef.current = null
       }
     } finally {
@@ -250,7 +250,7 @@ function CallPage() {
       if (s && fromUid) {
         s.emit('call-ended', { toUid: consultantId || undefined, fromUid, channelName })
       }
-    } catch {}
+    } catch { }
     await teardown(false)
   }
 
@@ -291,7 +291,7 @@ function CallPage() {
     // small delay so video elements mount
     const t = setTimeout(() => { join() }, 300)
     // On unmount, clean up media but DO NOT navigate automatically
-    return () => { clearTimeout(t); try { s.disconnect() } catch {}; teardown(true) }
+    return () => { clearTimeout(t); try { s.disconnect() } catch { }; teardown(true) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -324,9 +324,13 @@ function CallPage() {
 
       <div className="py-4 flex items-center justify-center gap-4 bg-neutral-900">
         <button onClick={toggleMic} className={`px-4 py-2 rounded ${micOn ? 'bg-neutral-700' : 'bg-red-600'} text-white`}>{micOn ? 'Mic On' : 'Mic Off'}</button>
-        {callType === 'video' && (
-          <button onClick={toggleCam} className={`px-4 py-2 rounded ${camOn ? 'bg-neutral-700' : 'bg-red-600'} text-white`}>{camOn ? 'Cam On' : 'Cam Off'}</button>
-        )}
+        {
+          callType === 'video'
+          &&
+          (
+            <button onClick={toggleCam} className={`px-4 py-2 rounded ${camOn ? 'bg-neutral-700' : 'bg-red-600'} text-white`}>{camOn ? 'Cam On' : 'Cam Off'}</button>
+          )
+        }
         <button onClick={leave} className="px-4 py-2 rounded bg-red-600 text-white">End</button>
       </div>
     </div>
