@@ -11,20 +11,34 @@ const IncomingCallPopup = ({ incoming, accept, reject }) => {
        
          const audio = new Audio();
          // Try to use Microsoft Teams ring tone first, fallback to better tone
-         audio.src = '/Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3';
+         // Multiple path options for Vercel deployment
+         const audioPaths = [
+            '/Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3',
+            './Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3',
+            `${window.location.origin}/Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3`,
+            // CDN fallback (replace with your CDN URL)
+            'https://your-cdn-domain.com/Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3'
+         ];
+         
+         audio.src = audioPaths[0];
          audio.loop = true;
          audio.volume = 0.7;
          audioRef.current = audio;
-         audio.addEventListener('error', () => {  
-            // Option 1: WhatsApp style ring tone
-            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjuBzvLZiTYIG2m98N+ZURE=';
-            
-            // Option 2: iPhone style ring tone (uncomment to use)
-            // audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjuBzvLZiTYIG2m98N+ZURE=';
-            
-            // Option 3: Simple but pleasant beep (uncomment to use)
-            // audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjuBzvLZiTYIG2m98N+ZURE=';
-         });
+         // Better error handling for Vercel deployment
+         let currentPathIndex = 0;
+         const tryNextPath = () => {
+            currentPathIndex++;
+            if (currentPathIndex < audioPaths.length) {
+               console.log(`Trying path ${currentPathIndex + 1}: ${audioPaths[currentPathIndex]}`);
+               audio.src = audioPaths[currentPathIndex];
+            } else {
+               console.log('All paths failed, using fallback tone');
+               // Fallback to base64 encoded tone
+               audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjuBzvLZiTYIG2m98N+ZURE=';
+            }
+         };
+         
+         audio.addEventListener('error', tryNextPath);
          
          // Play the ring sound
          audio.play().catch(e => console.log('Audio play failed:', e));
