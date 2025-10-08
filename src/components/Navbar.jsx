@@ -13,6 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useAuth } from "../authProvider/AuthProvider";
+import { Avatar, Menu, MenuItem, Tooltip } from "@mui/material";
 
 function Navbar() {
 
@@ -20,6 +21,15 @@ function Navbar() {
     const [isLoading, setIsLoading] = useState(true)
     const navigator = useNavigate();
     const { logout } = useAuth();
+    const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+    const [anchorElUser, setAnchorElUser] = useState(null);
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    };
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
 
     const getUserByID = async (id) => {
         try {
@@ -197,14 +207,36 @@ function Navbar() {
                             />
 
                         </Paper>
-                        <Button
-                            variant=""
-                            color="error"
-                            onClick={logOutButton}
-                            sx={{ fontSize: "14px", color: "red", textTransform: "none" }}
-                        >
-                            Log Out
-                        </Button>
+                        <Box sx={{ flexGrow: 0 }}>
+                            <Tooltip title="Open settings">
+                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                    <Avatar alt="Remy Sharp" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D" />
+                                </IconButton>
+                            </Tooltip>
+                            <Menu
+                                sx={{ mt: '45px' }}
+                                id="menu-appbar"
+                                anchorEl={anchorElUser}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                            >
+                                {settings.map((setting) => (
+                                    <MenuItem key={setting} onClick={setting === 'Logout' ? logOutButton : handleCloseUserMenu}>
+                                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </Box>
+
                     </Box>
                 </div>
             </Toolbar>

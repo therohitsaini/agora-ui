@@ -7,69 +7,23 @@ import {
   Typography,
   Button,
   Stack,
-  Grid,
-  Card,
-  CardContent,
+
   Chip,
-  IconButton
+
 } from '@mui/material'
 import AstrologerCard from '../components/AstrologerCard'
-import StarIcon from '@mui/icons-material/Star'
 import PhoneIcon from '@mui/icons-material/Phone'
 import VerifiedIcon from '@mui/icons-material/Verified'
-import PsychologyIcon from '@mui/icons-material/Psychology'
-import SupportAgentIcon from '@mui/icons-material/SupportAgent'
-import SecurityIcon from '@mui/icons-material/Security'
-import SpeedIcon from '@mui/icons-material/Speed'
-import TrendingUpIcon from '@mui/icons-material/TrendingUp'
+
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import { Link } from 'react-router-dom'
+
 import { allUserDetailsContext } from '../DashbordComponents/ApiContext/ApiContextUserData'
 
 
-const astrologerData = [
-  {
-    id: 1,
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    name: "Advit Sharma",
-    specialization: "Vedic Astrology • Numerology • Vastu Shastra",
-    rating: 4.9,
-    experience: 8,
-    orders: 16945,
-    price: 27,
-    discount: 5,
-    language: ["Hindi", "English", "Punjabi"],
-  },
-  {
-    id: 2,
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    name: "Rajesh Kumar",
-    specialization: "Vedic Astrology • Numerology • Vastu Shastra",
-    rating: 4.9,
-    experience: 8,
-    orders: 16945,
-    price: 27,
-    discount: 5,
-    language: ["Hindi", "English", "Marathi"],
-  },
-
-  {
-    id: 3,
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    name: "Suresh Kumar",
-    specialization: "Vedic Astrology • Numerology • Vastu Shastra",
-    rating: 4.9,
-    experience: 8,
-    orders: 16945,
-    price: 27,
-    discount: 5,
-    language: ["Hindi", "English"],
-  }
-]
 
 function HomeMainWeb() {
   const { allConsultant } = useContext(allUserDetailsContext)
-  console.log("allConsultant", allConsultant)
+
   return (
     <Fragment>
       <div>
@@ -188,7 +142,7 @@ function HomeMainWeb() {
                 </Box>
               </Stack>
 
-              
+
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
@@ -313,6 +267,8 @@ function HomeMainWeb() {
                       price={data?.fees}
                       discount={data?.fees}
                       language={data?.language}
+                      consultantStatus={data?.isActive}
+
                     />
                   ))
                 }

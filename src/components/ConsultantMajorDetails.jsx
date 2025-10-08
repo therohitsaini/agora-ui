@@ -13,10 +13,7 @@ import {
    Divider,
    Rating,
    LinearProgress,
-   List,
-   ListItem,
-   ListItemAvatar,
-   ListItemText
+
 } from '@mui/material'
 import VerifiedIcon from '@mui/icons-material/Verified'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -30,10 +27,10 @@ import PeopleIcon from '@mui/icons-material/People'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import Navbar from './Navbar'
 import { useParams, useNavigate } from 'react-router-dom'
-import { allUserDetailsContext } from '../DashbordComponents/ApiContext/ApiContextUserData'
 import { useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { toast, ToastContainer } from 'react-toastify'
+import InsufficientBalanceAlert from '../AlertModal/InsuficientBalanceAlert'
 
 function StatRow({ label, value, color = '#10b981' }) {
    return (
@@ -60,6 +57,8 @@ function ConsultantMajorDetails() {
    const [isFav, setIsFav] = useState(false)
    const [consultantByID, setConsultantByID] = useState([])
    const [socket, setSocket] = useState(null)
+   const [callFailed, setCallFailed] = useState(false)
+   const [isCalling, setIsCalling] = useState(false)
    const callingToastRef = useRef(null)
    const { id } = useParams()
    const navigate = useNavigate()
@@ -86,16 +85,17 @@ function ConsultantMajorDetails() {
          }
       } catch (err) {
          console.log(" Error in getConsultantByID:", err);
-         // setError("Server error, please try again later.");
+
       }
    }
    useEffect(() => {
       getConsultantByID(id);
    }, [id])
 
+   console.log("callFailed", callFailed)
    // setup socket for caller
    useEffect(() => {
-      const backendUrl = import.meta.env.VITE_BACK_END_URL || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
+      const backendUrl = import.meta.env.VITE_BACK_END_URL
       const s = io(backendUrl, {
          transports: ['websocket', 'polling'],
          reconnection: true,
@@ -113,15 +113,25 @@ function ConsultantMajorDetails() {
       s.on('error', (err) => {
          console.log('socket error', err)
       })
-
+      s.on('call-failed', (payload) => {
+         console.log('call-failed', payload)
+         setCallFailed(true)
+         setIsCalling(false)
+         if (callingToastRef.current) {
+            try { toast.dismiss(callingToastRef.current) } catch { }
+            callingToastRef.current = null
+         }
+         return
+      })
       s.on('call-accepted', (payload) => {
          const type = payload.type
          const channel = payload.channelName
          const uid = localStorage.getItem('user-ID')
          const consultantId = payload.fromUid || id
-         // Dismiss any calling toast
+         setIsCalling(false)
+
          if (callingToastRef.current) {
-            try { toast.dismiss(callingToastRef.current) } catch {}
+            try { toast.dismiss(callingToastRef.current) } catch { }
             callingToastRef.current = null
          }
          if (type === 'voice') {
@@ -134,9 +144,10 @@ function ConsultantMajorDetails() {
       })
 
       s.on('call-rejected', (payload) => {
-         // Dismiss any calling toast
+         setIsCalling(false)
+
          if (callingToastRef.current) {
-            try { toast.dismiss(callingToastRef.current) } catch {}
+            try { toast.dismiss(callingToastRef.current) } catch { }
             callingToastRef.current = null
          }
          const reason = payload?.reason || 'reject the call'
@@ -155,7 +166,13 @@ function ConsultantMajorDetails() {
       const channelName = `call${fromUid.slice(-6)}${id.slice(-6)}${ts}`
       const data = { toUid: id, fromUid, type: 'video', channelName }
       socket.emit('call-user', data)
-      try { callingToastRef.current = toast.loading('Calling consultant...') } catch {}
+      try { callingToastRef.current = toast.loading('Calling consultant...') } catch { }
+   }
+
+
+   const resetCallFailed = () => {
+      setCallFailed(false)
+      setIsCalling(false)
    }
 
    const startVoiceCall = () => {
@@ -163,11 +180,14 @@ function ConsultantMajorDetails() {
       if (!id) { toast.error('Consultant missing'); return }
       const fromUid = localStorage.getItem('user-ID')
       if (!fromUid) { toast.error('Login required'); return }
+      if (callFailed) return
+      if (isCalling) return
+      setIsCalling(true)
       const ts = Date.now().toString().slice(-8)
       const channelName = `voice${fromUid.slice(-6)}${id.slice(-6)}${ts}`
       const data = { toUid: id, fromUid, type: 'voice', channelName }
       socket.emit('call-user', data)
-      try { callingToastRef.current = toast.loading('Calling consultant...') } catch {}
+      try { callingToastRef.current = toast.loading('Calling consultant...') } catch { }
    }
 
 
@@ -197,6 +217,7 @@ function ConsultantMajorDetails() {
       <div className='w-full h-full'>
          <Navbar />
          <ToastContainer />
+         <InsufficientBalanceAlert open={callFailed} onClose={resetCallFailed} />
          <Box sx={{
             minHeight: '100vh',
             px: { xs: 2, md: 3 },
