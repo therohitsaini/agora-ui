@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       try {
          const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
          
-         // Try the token-verify endpoint first
+    
          const fetchData = await fetch(`${backendUrl}/api/auth/token-verify`, {
             method: "GET",
             headers: { 
@@ -48,9 +48,6 @@ export const AuthProvider = ({ children }) => {
          }
          
          const response = await fetchData.json();
-         console.log(" Token verified successfully:", response);
-         
-         // Always load full profile to ensure role is present
          const full = await loadUserFromApi(token);
          if (full) {
             setUser(full);
@@ -63,11 +60,11 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(false);
          }
       } catch (err) {
-         console.log("❌ Token verification failed:", err);
+         console.log(" Token verification failed:", err);
          
-         // If token-verify endpoint doesn't exist, try to get user details
+    
          try {
-            const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
+            const backendUrl = import.meta.env.VITE_BACK_END_URL;
             const userDataResponse = await fetch(`${backendUrl}/api/users/user-details`, {
                method: "GET",
                headers: { 
@@ -78,6 +75,7 @@ export const AuthProvider = ({ children }) => {
             
             if (userDataResponse.ok) {
                const userData = await userDataResponse.json();
+               console.log("userData", userData)
                const currentId = localStorage.getItem('user-ID');
                const me = Array.isArray(userData.data) ? userData.data.find(u => u?._id === currentId) : null;
                setUser(me || null);
@@ -96,6 +94,7 @@ export const AuthProvider = ({ children }) => {
          setLoading(false);
       }
    };
+   console.log("userAuth", user)
 
    const login = (token, userData) => {
       localStorage.setItem("access_user", token);

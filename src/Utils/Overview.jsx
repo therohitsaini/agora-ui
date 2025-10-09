@@ -6,13 +6,49 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 
 
 
-
-function Overview({ overViewLength ,cardData}) {
+function Overview({ overViewLength, totalClients = [], callsHistory = [] }) {
     const [animatedValues, setAnimatedValues] = useState([0, 0, 0, 0]);
     const [isAnimating, setIsAnimating] = useState(false);
 
+  const demmy = 11000
+    const cardData = [
+        {
+            title: 'Total Clients',
+            value: demmy ,
+            change: '+2%',
+            changeColor: 'green',
+            icon: <TrendingUpIcon sx={{ color: 'green' }} />,
+        },
+        {
+            title: 'Conversions',
+            value: Array.isArray(totalClients) ? totalClients.length : 0,
+            change: '-5%',
+            changeColor: 'red',
+            icon: <TrendingDownIcon sx={{ color: 'red' }} />,
+        },
+        {
+            title: 'Total Call Minutes',
+            value: 10000,
+            change: '+20%',
+            changeColor: 'green',
+            icon: <TrendingUpIcon sx={{ color: 'green' }} />,
+        },
+        {
+            title: 'Bloked User',
+            value: 0,
+            change: '+0.1%',
+            changeColor: 'lightblue',
+            icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
+        },
+    ];
+
+
     useEffect(() => {
+        // restart animation whenever key values change (e.g., totalClients length)
         setIsAnimating(true);
+        setAnimatedValues(Array(cardData.length).fill(0));
+
+        const intervals = [];
         cardData.forEach((card, index) => {
             const targetValue = card.value;
             const duration = 2000; // 2 seconds
@@ -38,12 +74,17 @@ function Overview({ overViewLength ,cardData}) {
                     }
                 }
             }, stepDuration);
+            intervals.push(interval);
         });
-    }, []);
+
+        return () => {
+            intervals.forEach(clearInterval);
+        };
+    }, [totalClients.length]);
 
     const formatValue = (value, index) => {
         const card = cardData[index];
-        if (card.title === 'Users' || card.title === 'Event count' || card.title === 'Bloked User') {
+        if (card.title === 'Total Clients' || card.title === 'Total Call Minutes' || card.title === 'Bloked User') {
             if (value >= 1000) {
                 return `${(value / 1000).toFixed(1)}k`;
             }

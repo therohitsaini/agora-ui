@@ -4,9 +4,9 @@ import { Fragment } from 'react'
 import { darkTheme } from '../DashbordComponents/DashbordPages/Client'
 import { DataGrid } from '@mui/x-data-grid'
 
-function DataGridTable() {
-   const rows = []
-   const columns = []
+function DataGridTable({ columns , rows}) {
+
+ 
    return (
       <Fragment>
          <ThemeProvider theme={darkTheme}>
@@ -19,7 +19,6 @@ function DataGridTable() {
                         backgroundColor: 'red',
                         borderRadius: 2,
 
-
                      }}
                   >
                      <DataGrid
@@ -27,6 +26,7 @@ function DataGridTable() {
                         columns={columns}
                         rowHeight={36}
                         columnHeaderHeight={40}
+                        getRowId={(row) => row.id ?? row._id ?? `${row.userId || 'u'}-${row.StartTime || 't'}`}
                         initialState={{
                            pagination: {
                               paginationModel: { page: 0, pageSize: 10 },
