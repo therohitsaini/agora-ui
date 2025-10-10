@@ -14,7 +14,7 @@ function DataGridTable({ columns , rows}) {
             
                   <Paper
                      sx={{
-                        height: 450,
+                        height: 470,
                         width: '100%',
                         backgroundColor: 'red',
                         borderRadius: 2,
@@ -29,7 +29,7 @@ function DataGridTable({ columns , rows}) {
                         getRowId={(row) => row.id ?? row._id ?? `${row.userId || 'u'}-${row.StartTime || 't'}`}
                         initialState={{
                            pagination: {
-                              paginationModel: { page: 0, pageSize: 10 },
+                              paginationModel: { page: 0, pageSize: 11 },
                            },
                         }}
                         pageSizeOptions={[7, 10]}

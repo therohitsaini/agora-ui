@@ -5,14 +5,14 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../authProvider/AuthProvider'
 import HomeIcon from "@mui/icons-material/Home";
-import PeopleIcon from "@mui/icons-material/People";
+import ChatIcon from "@mui/icons-material/Chat";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { io } from 'socket.io-client'
 import IncomingCallPopup from '../components/IncomingCallPopup'
 
 const menuItemConsultant = [
    { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/homeconsultant" },
-   { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/clients-consultant" },
+   { text: "Chat", icon: <ChatIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/chat-consultant" },
    // { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/tasks" },
    { text: "Analytics", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/analytics-consultant" },
 ];

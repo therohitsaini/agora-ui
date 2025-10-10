@@ -22,13 +22,14 @@ import PublicRoute from './authProvider/PublicRoute'
 import AdminRoute from './authProvider/AdminRoute'
 import ConsultantHome from './ConsultantDashboard/ConsultantHome'
 import HomeConsultant from './ConsultantDashboard/Pages/HomeConsultant'
-import ConsultantClients from './ConsultantDashboard/Pages/ConsultantClients'
+import ConsultantChat from './ConsultantDashboard/Pages/ConsultantChat'
 import AnalyticsConsultant from './ConsultantDashboard/Pages/AnalyticsConsultant'
 import Profile from './components/Profile'
 import HomeMainWeb from './HomeMain/HomeMainWeb'
 import ConsultantMajorDetails from './components/ConsultantMajorDetails'
 import CallPage from './components/CallPage'
 import VoiceCallPage from './components/VoiceCallPage'
+import ChatBox from './components/ChatBox'
 
 function App() {
   return (
@@ -80,7 +81,7 @@ function App() {
               <Route path="/home"
                 element={
                   // <ProtectRoute>
-                    <HomeMainWeb />
+                  <HomeMainWeb />
                   // </ProtectRoute>
                 } />
               <Route path="/consultant-major-details/:id"
@@ -90,15 +91,15 @@ function App() {
 
                 } />
 
-            <Route
-              path="/video-call"
-              element={<CallPage />}
-            />
-            <Route
-              path="/voice-call"
-              element={<VoiceCallPage />}
-            />
-
+              <Route
+                path="/video-call"
+                element={<CallPage />}
+              />
+              <Route
+                path="/voice-call"
+                element={<VoiceCallPage />}
+              />
+              <Route path="/chat" element={<ChatBox />} />
 
               <Route path="/dashboard"
                 element={
@@ -126,7 +127,7 @@ function App() {
                   // </ProtectRoute>
                 }>
                 <Route path='homeconsultant' element={<HomeConsultant />} />
-                <Route path='clients-consultant' element={<ConsultantClients />} />
+                <Route path='chat-consultant' element={<ConsultantChat />} />
                 <Route path='analytics-consultant' element={<AnalyticsConsultant />} />
                 <Route path='profile' element={<Profile />} />
                 <Route index element={<Navigate to="homeconsultant" replace />} />
