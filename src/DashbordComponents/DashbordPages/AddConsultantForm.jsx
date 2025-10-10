@@ -86,17 +86,19 @@ export default function AddConsultantForm() {
 
     return (
         <div className='w-[100%] h-[80%] flex justify-center items-center'>
-            <Paper sx={{ maxWidth: "70%", mx: 'auto', p: 4, mt: 4, bgcolor: '#f0e9e9' }}>
+            <Paper sx={{ maxWidth: "100%", mx: 'auto', p: 4, mt: 2,  border: "1px solid rgba(206, 43, 43, 0.75)",bgcolor:""}}>
 
                 <Box component="form" sx={{
                     display: "flex",
                     justifyContent: "center",
                     flexDirection: "column",
-                    gap: "15px"
+                    gap: "15px",
+               
+                    width:"100%"
                 }}
                     onSubmit={handleSubmit} noValidate>
                     <h1 className='heading text-xl font-bold'>Consultant Registration</h1>
-                    <div className='flex min-w-full justify-center gap-2 '>
+                    <div className='flex w-full justify-center gap-2  '>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 required
@@ -121,7 +123,7 @@ export default function AddConsultantForm() {
                                 name="email"
                                 type="email"
                                 sx={{
-                                    width: "250px"
+                                       width: "250px"
                                 }}
                                 value={formData.email}
                                 onChange={handleChange}
