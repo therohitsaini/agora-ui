@@ -22,14 +22,15 @@ import PublicRoute from './authProvider/PublicRoute'
 import AdminRoute from './authProvider/AdminRoute'
 import ConsultantHome from './ConsultantDashboard/ConsultantHome'
 import HomeConsultant from './ConsultantDashboard/Pages/HomeConsultant'
-import ConsultantChat from './ConsultantDashboard/Pages/ConsultantChat'
 import AnalyticsConsultant from './ConsultantDashboard/Pages/AnalyticsConsultant'
 import Profile from './components/Profile'
 import HomeMainWeb from './HomeMain/HomeMainWeb'
 import ConsultantMajorDetails from './components/ConsultantMajorDetails'
 import CallPage from './components/CallPage'
 import VoiceCallPage from './components/VoiceCallPage'
-import ChatBox from './components/ChatBox'
+import ConsultantChat from './ConsultantDashboard/ConsultantChat'
+import WebChatBox from './components/WebChatBox'
+
 
 function App() {
   return (
@@ -52,13 +53,7 @@ function App() {
                   </PublicRoute>
                 }
               />
-              {/* <Route
-                path="/callapp"
-                element={
-                  <ProtectRoute>
-                    <CallApp />
-                  </ProtectRoute>
-                } /> */}
+             
 
               <Route path="/callnotification"
                 element={
@@ -99,7 +94,7 @@ function App() {
                 path="/voice-call"
                 element={<VoiceCallPage />}
               />
-              <Route path="/chat" element={<ChatBox />} />
+         <Route path="/chat-web" element={<WebChatBox />} />
 
               <Route path="/dashboard"
                 element={
