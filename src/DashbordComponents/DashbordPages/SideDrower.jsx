@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
 import { useAuth } from '../../authProvider/AuthProvider';
+import HistoryIcon from '@mui/icons-material/History';
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData';
 
 const options = [
@@ -32,7 +33,7 @@ const menuItems = [
     { text: "Analytics", icon: <InsightsIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/analytics" },
     { text: "Add Consultant", icon: <PersonAddIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant-root" },
     { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/clients" },
-    { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/tasks" },
+    { text: "History", icon: <HistoryIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/admin/history-consultant-user" },
 ];
 
 const secondaryItems = [

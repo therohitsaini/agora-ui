@@ -30,6 +30,9 @@ import CallPage from './components/CallPage'
 import VoiceCallPage from './components/VoiceCallPage'
 import ConsultantChat from './ConsultantDashboard/ConsultantChat'
 import WebChatBox from './components/WebChatBox'
+import HistoryConsultantUser from './DashbordComponents/DashbordPages/HistoryConsultantUser'
+import SendGift from './components/SendGift'
+import UserProfileSection from './components/UserProfileSection'
 
 
 function App() {
@@ -53,7 +56,7 @@ function App() {
                   </PublicRoute>
                 }
               />
-             
+
 
               <Route path="/callnotification"
                 element={
@@ -94,8 +97,9 @@ function App() {
                 path="/voice-call"
                 element={<VoiceCallPage />}
               />
-         <Route path="/chat-web" element={<WebChatBox />} />
-
+              <Route path="/chat-web" element={<WebChatBox />} />
+              <Route path="/send-gift" element={<SendGift />} />
+              <Route path="/user-profile-section" element={<UserProfileSection />} />
               <Route path="/dashboard"
                 element={
                   <AdminRoute>
@@ -112,6 +116,7 @@ function App() {
                 <Route path='overview' element={<Overview />} />
                 <Route path='consultant-home' element={<ConsultantHome />} />
                 <Route path='profile' element={<Profile />} />
+                <Route path='admin/history-consultant-user' element={<HistoryConsultantUser />} />
                 <Route index element={<Navigate to="home" replace />} />
                 {/* Nasted Dashboard Route End */}
               </Route>

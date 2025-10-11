@@ -23,6 +23,11 @@ function Navbar() {
     const { logout } = useAuth();
     const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
     const [anchorElUser, setAnchorElUser] = useState(null);
+    const profileOptions = [
+        { text: "Profile", path: "/user-profile-section" },
+        { text: "Settings", path: "/dashboard/settings" },
+        { text: "Logout", path: "/dashboard/logout" },
+    ]
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -229,11 +234,19 @@ function Navbar() {
                                 open={Boolean(anchorElUser)}
                                 onClose={handleCloseUserMenu}
                             >
-                                {settings.map((setting) => (
+                                {/* {settings.map((setting) => (
                                     <MenuItem key={setting} onClick={setting === 'Logout' ? logOutButton : handleCloseUserMenu}>
                                         <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                                     </MenuItem>
-                                ))}
+                                ))} */}
+                                {
+                                    profileOptions.map((option) => (
+                                        
+                                        <MenuItem key={option.text} onClick={() => handleCloseUserMenu(option.path)}>
+                                            <Typography sx={{ textAlign: 'center' }}>{option.text}</Typography>
+                                        </MenuItem>
+                                    ))
+                                }
                             </Menu>
                         </Box>
 

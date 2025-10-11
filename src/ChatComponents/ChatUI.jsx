@@ -140,8 +140,6 @@ function ChatUI({ height }) {
          color: 'white',
          flexDirection: { xs: 'column', md: 'row' },
          overflow: 'hidden',
-       
-     
       }}>
          {/* Left Sidebar - Chat List */}
          <Box sx={{ 

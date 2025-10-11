@@ -31,6 +31,7 @@ import { useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { toast, ToastContainer } from 'react-toastify'
 import InsufficientBalanceAlert from '../AlertModal/InsuficientBalanceAlert'
+import SendGift from './SendGift'
 
 function StatRow({ label, value, color = '#10b981' }) {
    return (
@@ -328,62 +329,15 @@ function ConsultantMajorDetails() {
 
                         <Divider sx={{ my: 2, borderColor: 'rgba(148,163,184,0.12)' }} />
 
-                        <Stack spacing={2}>
-                           {['Archita', 'Sujata', 'Aniket'].map((n, i) => (
-                              <Card key={i} sx={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)', border: '1px solid rgba(148,163,184,0.12)' }}>
-                                 <CardContent sx={{ p: 2 }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                       <Typography variant="subtitle2" sx={{ color: '#e5e7eb', fontWeight: 600 }}>{n}</Typography>
-                                       <Rating value={5} readOnly size="small" />
-                                    </Stack>
-                                    <Typography variant="body2" sx={{ color: '#94a3b8', mt: 1.0 }}>
-                                       Amazing guidance and clear remedies. Highly recommended.
-                                    </Typography>
-                                 </CardContent>
-                              </Card>
-                           ))}
-                        </Stack>
+                      
                      </CardContent>
                   </Card>
                </Grid>
 
-               <Grid item xs={12} md={4}>
-                  {/* <Card sx={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: 3 }}>
-                     <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                        <Typography variant="h6" sx={{ color: '#f8fafc', mb: 1.5 }}>Check Similar Consultants</Typography>
-                        <List>
-                           {consultant.similar.map((s, idx) => (
-                              <ListItem key={idx} sx={{ px: 0 }}>
-                                 <ListItemAvatar>
-                                    <Avatar src={`https://i.pravatar.cc/100?img=${idx + 10}`} />
-                                 </ListItemAvatar>
-                                 <ListItemText
-                                    primary={
-                                       <Typography variant="body2" sx={{ color: '#e5e7eb', fontWeight: 600 }}>{s.name}</Typography>
-                                    }
-                                    secondary={
-                                       <Stack direction="row" spacing={1} alignItems="center">
-                                          <Rating value={s.rating} readOnly size="small" />
-                                          <Button size="small" variant="text" sx={{ color: '#10b981', textTransform: 'none' }}>View</Button>
-                                       </Stack>
-                                    }
-                                 />
-                              </ListItem>
-                           ))}
-                        </List>
-                     </CardContent>
-                  </Card> */}
-
-                  <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)', border: '1px solid rgba(148,163,184,0.12)', borderRadius: 3 }}>
-                     <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-                        <Stack spacing={1.5}>
-                           <Button startIcon={<CallIcon />} variant="contained" sx={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', textTransform: 'none', fontWeight: 700, borderRadius: 2 }}>Quick Voice Call</Button>
-                           <Button startIcon={<VideocamIcon />} variant="outlined" sx={{ borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2, '&:hover': { borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)' } }}>Quick Video Call</Button>
-                           <Button startIcon={<MessageIcon />} variant="outlined" sx={{ borderColor: 'rgba(148,163,184,0.35)', color: '#e5e7eb', textTransform: 'none', fontWeight: 700, borderRadius: 2, '&:hover': { borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.08)' } }}>Ask on Chat</Button>
-                        </Stack>
-                     </CardContent>
-                  </Card>
-               </Grid>
+               
+       
+               <SendGift />
+               
             </Grid>
          </Box>
       </div>

@@ -130,7 +130,7 @@ function HomeConsultant() {
       const rowId = call?.id || call?._id || `${call?.userId || 'unknown'}-${call?.startTime || idx}-${idx}`
       return {
          id: rowId, // must be unique per row for the grid
-         fullname: call?.user?.fullName || call?.user?.fullname || '-',
+         fullname: call?.user?.fullname || call?.user?.fullName || '-',
          EmailId: call?.user?.EmailId || call?.user?.email || '-',
          CallType: call?.type || '-',
          StartTime: formatDateTime(call?.startTime),
