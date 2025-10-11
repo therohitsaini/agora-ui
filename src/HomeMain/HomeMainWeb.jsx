@@ -23,7 +23,7 @@ import { allUserDetailsContext } from '../DashbordComponents/ApiContext/ApiConte
 
 function HomeMainWeb() {
   const { allConsultant } = useContext(allUserDetailsContext)
-
+console.log("allConsultant", allConsultant)
   return (
     <Fragment>
       <div>
@@ -259,7 +259,7 @@ function HomeMainWeb() {
                       id={data?._id}
                       key={index}
                       photo={data?.photo}
-                      name={data?.fullName}
+                      name={data?.fullname}
                       specialization={data?.profession}
                       rating={data?.rating}
                       experience={data?.experience}

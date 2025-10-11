@@ -92,8 +92,7 @@ function ConsultantMajorDetails() {
       getConsultantByID(id);
    }, [id])
 
-   console.log("callFailed", callFailed)
-   // setup socket for caller
+
    useEffect(() => {
       const backendUrl = import.meta.env.VITE_BACK_END_URL
       const s = io(backendUrl, {
@@ -242,7 +241,7 @@ function ConsultantMajorDetails() {
                            <Grid item xs={12} sm>
                               <Stack spacing={1}>
                                  <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography variant="h5" sx={{ color: '#f8fafc', fontWeight: 700 }}>{consultantByID.fullName}</Typography>
+                                    <Typography variant="h5" sx={{ color: '#f8fafc', fontWeight: 700 }}>{consultantByID.fullname}</Typography>
                                     <VerifiedIcon sx={{ color: '#10b981' }} />
                                  </Stack>
                                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>{consultantByID.profession}</Typography>

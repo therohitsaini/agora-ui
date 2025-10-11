@@ -30,7 +30,7 @@ export const AllUserProvider = ({ children }) => {
                 return;
             }
             const data = await res.json();
-
+       
             if (res.ok) {
                 setAllUsers(data.data || []);
             } else {
@@ -52,7 +52,7 @@ export const AllUserProvider = ({ children }) => {
             });
 
             const responseData = await res.json();
-
+        
             if (res.ok) {
                 const consultants = responseData.findConsultant || [];
                 setAllConsultant(consultants);
@@ -66,7 +66,7 @@ export const AllUserProvider = ({ children }) => {
             // setLoading(false);
         }
     }
-  
+
 
     useEffect(() => {
         getAllUsers();
