@@ -35,6 +35,11 @@ import SendGift from './components/SendGift'
 import UserProfileSection from './components/UserProfileSection'
 import ClientCallsHistory from './ConsultantDashboard/Pages/ClientCallsHistory'
 
+import ActiveCalls from './ConsultantDashboard/Pages/UserCallsHistory'
+import MissedCalls from './ConsultantDashboard/Pages/MissedCalls'
+import UserCallsHistory from './ConsultantDashboard/Pages/UserCallsHistory'
+import CallHistoryVoice from './ConsultantDashboard/Pages/CallHistoryVoice'
+
 
 function App() {
   return (
@@ -131,6 +136,9 @@ function App() {
                 <Route path='chat-consultant' element={<ConsultantChat />} />
                 <Route path='analytics-consultant' element={<AnalyticsConsultant />} />
                 <Route path='user-calls-history' element={<ClientCallsHistory />} />
+                <Route path='call-history-voice' element={<CallHistoryVoice />} />
+                <Route path='active-calls' element={<UserCallsHistory />} />
+                <Route path='missed-calls' element={<MissedCalls />} />
                 <Route path='profile' element={<Profile />} />
                 <Route index element={<Navigate to="homeconsultant" replace />} />
               </Route>

@@ -2,9 +2,11 @@ import React from 'react'
 import { Fragment } from 'react'
 import Overview from '../../Utils/Overview'
 import DataGridTable from '../../components/DataGridTable'
-import { Box } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchConsultantUsers } from '../../Store/users/UserSlice'
 
 function HistoryConsultantUser() {
     const [historyConsultantUser, setHistoryConsultantUser] = useState([])
@@ -23,59 +25,42 @@ function HistoryConsultantUser() {
         { field: 'Duration', headerName: 'Duration', flex: 0.8, minWidth: 120 },
         { field: 'EndTime', headerName: 'End Time', flex: 1, minWidth: 150 },
     ];
-
-    const rows_ = [
-        {
-            consultantName: 'John Doe',
-            ClientName: 'Manish',
-            CallType: 'Voice Call',
-            StartTime: '2021-01-01',
-            Duration: '10',
-            EndTime: '2021-01-01'
-        },
-        {
-            consultantName: 'John Doe',
-            ClientName: 'Manish',
-            CallType: 'Voice Call',
-            StartTime: '2021-01-01',
-            Duration: '10',
-            EndTime: '2021-01-01'
-        }
-    ]
-
-
-    const getAllHistoryConsultantUser = async () => {
-        if (!id) {
-            console.log("Id is not found")
-            return
-        }
-        const url = `${import.meta.env.VITE_BACK_END_URL}/api-consultant/consultant-all-user-history/${id}`
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        const { historyConsultantUser } = await response.json()
- 
-        if (response.ok) {
-            setHistoryConsultantUser(historyConsultantUser)
-        } else {
-            console.log("Failed to get history consultant user")
-        }
-    }
+    const dispatch = useDispatch()
+    const { consultantList, consultantStatus } = useSelector(state => state.users)
     useEffect(() => {
-        getAllHistoryConsultantUser(id)
+        dispatch(fetchConsultantUsers())
     }, [id])
-    console.log("historyConsultantUser", historyConsultantUser)
 
-const rows = historyConsultantUser.map((item) => ({
-    id: item.id,
-    consultantName: item.consultantSnapshot?.fullname,
-    ClientName: item.userSnapshot?.fullname,
-    CallType: item.type,
-    StartTime: item.startTime,
-    Duration: item.durationSeconds,
-    EndTime: item.endTime,
-}))
+    if (consultantStatus === 'loading') {
+        return <div>Loading...</div>
+    }
+    console.log("consultantList", consultantList.historyConsultantUser)
+    console.log("consultantStatus", consultantStatus)
+
+    if (!consultantList || !Array.isArray(consultantList.historyConsultantUser)) {
+        return <div>
+            <svg width={0} height={0}>
+                <defs>
+                    <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#e01cd5" />
+                        <stop offset="100%" stopColor="#1CB5E0" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <CircularProgress size={70} thickness={4.5} sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
+        </div>;
+    }
+
+    const rows = (consultantList?.historyConsultantUser ?? []).map((item) => ({
+        id: item.id,
+        consultantName: item.consultantSnapshot?.fullname ?? '-',
+        ClientName: item.userSnapshot?.fullname ?? '-',
+        CallType: item.type ?? '-',
+        StartTime: item.startTime ?? '-',
+        Duration: item.durationSeconds ?? 0,
+        EndTime: item.endTime ?? '-', // fixed typo
+    }));
+
 
     return (
         <Fragment>
