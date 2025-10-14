@@ -192,13 +192,13 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
                 <div className=''>
                     <Divider sx={{ borderColor: "#334155" }} />
                     <div className='flex gap-4 '>
-                        <Box display="flex" alignItems="center" p={1.5}>
+                        <Box display="flex" alignItems="center">
                             <Avatar src={user?.avatar || "https://img.freepik.com/free-photo/user-sign-icon-front-side_187299-47522.jpg?t=st=1759985913~exp=1759989513~hmac=c690e05b2ca433abd852b66886643ef74fd207f2e0476ac9bcdb5f5a6c4931c8&w=1480"} />
                             <Box ml={1.5} flexGrow={1}>
                                 <Typography fontWeight="bold" fontSize={14}>
                                     {user?.fullName || "User"}
                                 </Typography>
-                                <Typography fontSize={12} sx={{ color: "#94a3b8" }}>
+                                <Typography fontSize={12} sx={{ color: "#94a3b8",fontSize:"10px" }}>
                                     {user?.email || "user@email.com"}
                                 </Typography>
                             </Box>

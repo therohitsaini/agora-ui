@@ -32,7 +32,16 @@ function Navbar() {
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
-    const handleCloseUserMenu = () => {
+    const handleCloseUserMenu = (paylod) => {
+        console.log("Payload from menu:", paylod);
+
+        if (paylod === "/user-profile-section") {
+            navigator('/user-profile-section');
+        }
+        else if (paylod === "/dashboard/logout") {
+            logout();
+            navigator('/');
+        }
         setAnchorElUser(null);
     };
 
@@ -112,10 +121,10 @@ function Navbar() {
 
 
 
-    const logOutButton = () => {
-        logout();
-        navigator('/');
-    }
+    // const logOutButton = () => {
+    //     logout();
+    //     navigator('/');
+    // }
 
     return (
         <AppBar position="sticky"
@@ -241,7 +250,7 @@ function Navbar() {
                                 ))} */}
                                 {
                                     profileOptions.map((option) => (
-                                        
+
                                         <MenuItem key={option.text} onClick={() => handleCloseUserMenu(option.path)}>
                                             <Typography sx={{ textAlign: 'center' }}>{option.text}</Typography>
                                         </MenuItem>

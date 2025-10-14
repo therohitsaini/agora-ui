@@ -33,6 +33,7 @@ import WebChatBox from './components/WebChatBox'
 import HistoryConsultantUser from './DashbordComponents/DashbordPages/HistoryConsultantUser'
 import SendGift from './components/SendGift'
 import UserProfileSection from './components/UserProfileSection'
+import ClientCallsHistory from './ConsultantDashboard/Pages/ClientCallsHistory'
 
 
 function App() {
@@ -129,6 +130,7 @@ function App() {
                 <Route path='homeconsultant' element={<HomeConsultant />} />
                 <Route path='chat-consultant' element={<ConsultantChat />} />
                 <Route path='analytics-consultant' element={<AnalyticsConsultant />} />
+                <Route path='user-calls-history' element={<ClientCallsHistory />} />
                 <Route path='profile' element={<Profile />} />
                 <Route index element={<Navigate to="homeconsultant" replace />} />
               </Route>

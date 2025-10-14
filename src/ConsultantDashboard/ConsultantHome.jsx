@@ -14,6 +14,7 @@ const menuItemConsultant = [
    { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/homeconsultant" },
    { text: "Chat", icon: <ChatIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/chat-consultant" },
    // { text: "Tasks", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/tasks" },
+   { text: "Call History", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/user-calls-history" },
    { text: "Analytics", icon: <AssignmentIcon sx={{ fontSize: "16px" }} />, path: "/consultant-dashboard/analytics-consultant" },
 ];
 const profileOptions = [
