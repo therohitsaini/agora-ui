@@ -26,14 +26,21 @@ const options = [
 ];
 
 
-const ITEM_HEIGHT = 48;
+
 
 const menuItems = [
     { text: "Home", icon: <HomeIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/home" },
     { text: "Analytics", icon: <InsightsIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/analytics" },
     { text: "Add Consultant", icon: <PersonAddIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/consultant-root" },
     { text: "Clients", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/clients" },
-    { text: "History", icon: <HistoryIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/admin/history-consultant-user" },
+    { text: "Call History", icon: <HistoryIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/admin/admin-tabs" },
+    
+    {
+        header: "Staff Management",
+        items: [
+            { text: "Staff", icon: <PeopleIcon sx={{ fontSize: "16px" }} />, path: "/dashboard/admin/staff-root" },
+        ],
+    }
 ];
 
 const secondaryItems = [
@@ -52,8 +59,7 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
     const open = Boolean(anchorEl);
     console.log("user", user)
 
-    // const isConsultant = consultantByID?.role === 'consultant';
-    // console.log("isConsultant", isConsultant)
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -89,40 +95,60 @@ function SideDrower({ menuItemConsultant, profileOptions }) {
             <div className='side-bar flex flex-col justify-between h-full '>
                 <Box>
                     <List sx={{ mt: 10, px: "10px" }}>
-                        {
-                            (menuItemConsultant ? menuItemConsultant : menuItems).map((item) => (
+                        { (menuItemConsultant ? menuItemConsultant : menuItems).map((item) => {
+                            // Render a section with header + nested items
+                            if (item.header && Array.isArray(item.items)) {
+                                return (
+                                    <Box key={item.header} sx={{ mb: 1.5 }}>
+                                        <Typography sx={{  py: 0.5, color: "#94a3b8", fontSize: 12, textTransform: "none" }}>
+                                            {item.header}
+                                        </Typography>
+                                        {item.items.map((sub) => (
+                                            <ListItem key={sub.text} disablePadding>
+                                                <ListItemButton
+                                                    component={Link}
+                                                    to={sub.path}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        "&.Mui-selected": { backgroundColor: "#1e293b" },
+                                                        p: "5px",
+                                                        px: "10px",
+                                                    }}
+                                                    selected={location.pathname === sub.path}
+                                                >
+                                                    <ListItemIcon sx={{ color: "#fff", minWidth: 22, mr: 1 }}>
+                                                        {sub.icon}
+                                                    </ListItemIcon>
+                                                    <ListItemText primary={sub.text} primaryTypographyProps={{ fontSize: "13px", color: "#fff" }} />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        ))}
+                                    </Box>
+                                );
+                            }
+
+                            // Render a regular flat item
+                            return (
                                 <ListItem key={item.text} disablePadding>
                                     <ListItemButton
                                         component={Link}
                                         to={item.path}
                                         sx={{
                                             borderRadius: 2,
-                                            "&.Mui-selected": {
-                                                backgroundColor: "#1e293b",
-                                            },
+                                            "&.Mui-selected": { backgroundColor: "#1e293b" },
                                             p: "5px",
                                             px: "10px",
                                         }}
                                         selected={location.pathname === item.path}
                                     >
-                                        <ListItemIcon
-                                            sx={{
-                                                color: "#fff",
-                                                minWidth: 22,
-                                                mr: 1,
-                                            }}
-                                        >
+                                        <ListItemIcon sx={{ color: "#fff", minWidth: 22, mr: 1 }}>
                                             {item.icon}
                                         </ListItemIcon>
-
-                                        <ListItemText
-                                            primary={item.text}
-                                            primaryTypographyProps={{ fontSize: "13px", color: "#fff" }}
-                                        />
+                                        <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: "13px", color: "#fff" }} />
                                     </ListItemButton>
                                 </ListItem>
-                            ))
-                        }
+                            );
+                        }) }
                     </List>
 
                     <List sx={{ mt: 2, px: "7px" }}>

@@ -92,40 +92,10 @@ function Overview({ overViewLength, totalClients = [], callsHistory = [] }) {
         return value.toString();
     };
 
-    // const cardData = [
-    //     {
-    //         title: 'Total Clients',
-    //         value: overViewLength,
-    //         change: '+2%',
-    //         changeColor: 'green',
-    //         icon: <TrendingUpIcon sx={{ color: 'green' }} />,
-    //     },
-    //     {
-    //         title: 'Conversions',
-    //         value: overViewLength,
-    //         change: '-5%',
-    //         changeColor: 'red',
-    //         icon: <TrendingDownIcon sx={{ color: 'red' }} />,
-    //     },
-    //     {
-    //         title: 'Event count',
-    //         value: 100,
-    //         change: '+0%',
-    //         changeColor: 'lightblue',
-    //         icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    //     },
-    //     {
-    //         title: 'Bloked User',
-    //         value: 0,
-    //         change: '+0.1%',
-    //         changeColor: 'lightblue',
-    //         icon: <ShowChartIcon sx={{ color: 'lightblue' }} />,
-    //     },
-    // ];
 
     return (
         <Box sx={{
-  
+//   paddingX: 2.5,
         }}>
             <Typography fontSize={20} gutterBottom color='white'>
                 Overview

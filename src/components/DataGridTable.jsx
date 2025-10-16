@@ -11,12 +11,11 @@ function DataGridTable({ columns , rows}) {
       <Fragment>
          <ThemeProvider theme={darkTheme}>
            
-            
                   <Paper
                      sx={{
                         height: 470,
                         width: '100%',
-                        backgroundColor: 'red',
+                     
                         borderRadius: 2,
 
                      }}
@@ -44,6 +43,9 @@ function DataGridTable({ columns , rows}) {
                               color: '#fff',
                               fontWeight: 'bold',
 
+                           },
+                           '& .MuiTabPanel-root': {
+                              width: '100%',
                            },
                            '& .MuiDataGrid-columnHeaderTitleContainer, .MuiDataGrid-cell': {
                               display: 'flex', justifyContent: "center"

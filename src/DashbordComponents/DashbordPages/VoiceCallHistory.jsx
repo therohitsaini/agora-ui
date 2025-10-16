@@ -2,8 +2,7 @@ import React from 'react'
 import { Box } from '@mui/material'
 import DataGridTable from '../../components/DataGridTable'
 
-function CallHistoryVoice({ columns, rows }) {
-
+function VoiceCallHistory({ columns, rows }) {
     const rowsVoice = rows?.filter((call) => call.CallType === 'voice');
     console.log("rows____________", rows)
     return (
@@ -13,4 +12,4 @@ function CallHistoryVoice({ columns, rows }) {
     )
 }
 
-export default CallHistoryVoice
+export default VoiceCallHistory

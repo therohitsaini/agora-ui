@@ -1,7 +1,6 @@
 import { Fragment } from 'react'
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-
 import SignIn from './Auth/SignIn'
 import SignUp from './Auth/SignUp'
 import CallNotification from './components/CallNotification'
@@ -30,15 +29,17 @@ import CallPage from './components/CallPage'
 import VoiceCallPage from './components/VoiceCallPage'
 import ConsultantChat from './ConsultantDashboard/ConsultantChat'
 import WebChatBox from './components/WebChatBox'
-import HistoryConsultantUser from './DashbordComponents/DashbordPages/HistoryConsultantUser'
 import SendGift from './components/SendGift'
 import UserProfileSection from './components/UserProfileSection'
 import ClientCallsHistory from './ConsultantDashboard/Pages/ClientCallsHistory'
-
-import ActiveCalls from './ConsultantDashboard/Pages/UserCallsHistory'
 import MissedCalls from './ConsultantDashboard/Pages/MissedCalls'
 import UserCallsHistory from './ConsultantDashboard/Pages/UserCallsHistory'
 import CallHistoryVoice from './ConsultantDashboard/Pages/CallHistoryVoice'
+import AdminTabs from './DashbordComponents/AdminDashboardHistoryTabs/AdminTabs'
+import CallHistory from './DashbordComponents/DashbordPages/CallHistory'
+import VideoCallHistory from './DashbordComponents/DashbordPages/VideoCallHistory'
+import VoiceCallHistory from './DashbordComponents/DashbordPages/VoiceCallHistory'
+import StaffRoot from './DashbordComponents/StaffRoot/StaffRoot'
 
 
 function App() {
@@ -122,7 +123,11 @@ function App() {
                 <Route path='overview' element={<Overview />} />
                 <Route path='consultant-home' element={<ConsultantHome />} />
                 <Route path='profile' element={<Profile />} />
-                <Route path='admin/history-consultant-user' element={<HistoryConsultantUser />} />
+                <Route path='admin/call-history' element={<CallHistory />} />
+                <Route path='admin/voice-call-history' element={<VoiceCallHistory />} />
+                <Route path='admin/video-call-history' element={<VideoCallHistory />} />
+                <Route path='admin/admin-tabs' element={<AdminTabs />} />
+                <Route path='admin/staff-root' element={<StaffRoot />} />
                 <Route index element={<Navigate to="home" replace />} />
                 {/* Nasted Dashboard Route End */}
               </Route>

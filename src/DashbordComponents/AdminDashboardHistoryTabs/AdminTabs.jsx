@@ -5,30 +5,67 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import ActiveCalls from './UserCallsHistory';
-import MissedCalls from './MissedCalls';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers } from '../../Store/users/UserSlice';
-import UserCallsHistory from './UserCallsHistory';
-import CallHistoryVoice from './CallHistoryVoice';
+import { fetchConsultantUsers, fetchUsers } from '../../Store/users/UserSlice';
 import { formatDateTime, formatSeconds, deriveDurationSeconds } from '../../Utils/TimeFormets';
-import CallHistoryVideo from './CallHistoryVideo';
 import { CircularProgress } from '@mui/material';
 import Overview from '../../Utils/Overview';
+import CallHistory from '../DashbordPages/CallHistory';
+import VoiceCallHistory from '../DashbordPages/VoiceCallHistory';
+import VideoCallHistory from '../DashbordPages/VideoCallHistory';
 
-function ClientCallsHistory() {
+
+const columns = [
+    // { field: 'id', headerName: 'ID', flex: 0.5, minWidth: 100 },
+    { field: 'consultantName', headerName: 'Consultant Name', flex: 1, minWidth: 150 },
+    { field: 'ClientName', headerName: 'Client Name', flex: 1, minWidth: 150 },
+    { field: 'CallType', headerName: 'Call Type', flex: 1, minWidth: 150 },
+    { field: 'StartTime', headerName: 'Start Time', flex: 1, minWidth: 150 },
+    { field: 'Duration', headerName: 'Duration', flex: 0.8, minWidth: 120 },
+    { field: 'EndTime', headerName: 'End Time', flex: 1, minWidth: 150 },
+];
+
+function AdminTabs() {
     const [value, setValue] = useState('1');
     const id = localStorage.getItem('user-ID');
+
+
+
+    const dispatch = useDispatch()
+    const { consultantList, consultantStatus } = useSelector(state => state.users)
+    useEffect(() => {
+        dispatch(fetchConsultantUsers())
+    }, [id])
+
+    if (!consultantList || !Array.isArray(consultantList.historyConsultantUser)) {
+        return <div className='flex justify-center items-center h-[80vh]'>
+            <svg width={0} height={0}>
+                <defs>
+                    <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#e01cd5" />
+                        <stop offset="100%" stopColor="#1CB5E0" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <CircularProgress size={70} thickness={4.5} sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
+        </div>;
+    }
+
+    const rows = (consultantList?.historyConsultantUser ?? []).map((item) => ({
+        id: item.id,
+        consultantName: item.consultantSnapshot?.fullname ?? '-',
+        ClientName: item.userSnapshot?.fullname ?? '-',
+        CallType: item.type ?? '-',
+        StartTime: item.startTime ?? '-',
+        Duration: item.durationSeconds ?? 0,
+        EndTime: item.endTime ?? '-', // fixed typo
+    }));
+
+
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-    const dispatch = useDispatch();
-    const { userData } = useSelector(state => state.users.list);
-    const status = useSelector(state => state.users.status);
-    useEffect(() => {
-        dispatch(fetchUsers(id));
-    }, [id]);
 
     const tabs = [
         {
@@ -45,47 +82,9 @@ function ClientCallsHistory() {
             value: '3'
         }
     ]
-    const columns =
-        [
-            { field: 'fullname', headerName: 'First name', width: 180 },
-            { field: 'EmailId', headerName: 'Email Id', width: 180 },
-            { field: 'CallType', headerName: 'Call Type', width: 150 },
-            { field: 'StartTime', headerName: 'Start Time', width: 150 },
-            { field: 'Duration', headerName: 'Duration', width: 150 },
-            { field: 'EndTime', headerName: 'End Time', width: 150 },
-
-        ];
-
-
-
-    const rows = userData?.map((call, idx) => {
-        const durationSec = deriveDurationSeconds(call.startTime, call.endTime, call.durationSeconds)
-        const rowId = call?.id || call?._id || `${call?.userId || 'unknown'}-${call?.startTime || idx}-${idx}`
-        return {
-            id: rowId, // must be unique per row for the grid
-            fullname: call?.user?.fullname || call?.user?.fullName || '-',
-            EmailId: call?.user?.EmailId || call?.user?.email || '-',
-            CallType: call?.type + "Call" || '-',
-            StartTime: formatDateTime(call?.startTime),
-            Duration: formatSeconds(durationSec),
-            EndTime: formatDateTime(call?.endTime),
-        }
-    })
-
-    if (status === 'loading') {
-        return <div className='text-white flex justify-center items-center h-[80vh]'> <svg width={0} height={0}>
-            <defs>
-                <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#e01cd5" />
-                    <stop offset="100%" stopColor="#1CB5E0" />
-                </linearGradient>
-            </defs>
-        </svg>
-            <CircularProgress size={70} thickness={4.5} sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} /></div>
-    }
 
     return (
-        <Box sx={{ width: '100%', typography: 'body1' }}>
+        <Box sx={{ width: '100%', typography: 'body1', mt: 5 }}>
             <Overview />
             <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, px: 2, mt: 5, borderColor: 'divider' }}>
@@ -128,13 +127,16 @@ function ClientCallsHistory() {
                     </TabList>
                 </Box>
                 <TabPanel value="1">
-                    <UserCallsHistory columns={columns} rows={rows} />
+                    {/* <UserCallsHistory columns={columns} rows={rows} /> */}
+                    <CallHistory columns={columns} rows={rows} />
                 </TabPanel>
                 <TabPanel value="2">
-                    <CallHistoryVoice columns={columns} rows={rows} />
+                    {/* <CallHistoryVoice columns={columns} rows={rows} /> */}
+                    <VoiceCallHistory columns={columns} rows={rows} />
                 </TabPanel>
                 <TabPanel value="3">
-                    <CallHistoryVideo columns={columns} rows={rows} />
+                    {/* <CallHistoryVideo columns={columns} rows={rows} /> */}
+                    <VideoCallHistory columns={columns} rows={rows} />
                 </TabPanel>
             </TabContext>
             <div className='w-full text-slate-600 py-10 text-center'>    © 2025 Saini Web Solutions. All rights reserved.</div>
@@ -142,4 +144,4 @@ function ClientCallsHistory() {
     );
 }
 
-export default ClientCallsHistory;
+export default AdminTabs;
