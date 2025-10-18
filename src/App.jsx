@@ -107,6 +107,7 @@ function App() {
               <Route path="/chat-web" element={<WebChatBox />} />
               <Route path="/send-gift" element={<SendGift />} />
               <Route path="/user-profile-section" element={<UserProfileSection />} />
+         
               <Route path="/dashboard"
                 element={
                   <AdminRoute>

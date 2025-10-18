@@ -17,6 +17,20 @@ function DashbordHome() {
     const currentPath = location.pathname.split('/').pop();
     const pageTitle = currentPath.charAt(0).toUpperCase() + currentPath.slice(1);
 
+
+    const shoopifyInstall = async () => {
+        try {
+            const response = await fetch(`http://localhost:5173/app/install`)
+            const data = await response.json()
+            console.log(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        shoopifyInstall()
+    }, [])
     const getAllusers = async (e) => {
         try {
             const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`;
@@ -39,6 +53,7 @@ function DashbordHome() {
     const data = {
         allusers
     }
+
 
     return (
         <div className="h-screen flex flex-col">
