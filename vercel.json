@@ -1,4 +1,7 @@
 {
+    "buildCommand": "npm run build:vercel",
+    "outputDirectory": "dist",
+    "installCommand": "npm install --legacy-peer-deps",
     "rewrites": [
         {
             "source": "/(.*)",
@@ -15,5 +18,10 @@
                 }
             ]
         }
-    ]
+    ],
+    "functions": {
+        "app/api/**/*.js": {
+            "runtime": "nodejs18.x"
+        }
+    }
 }
