@@ -1,6 +1,10 @@
 import { Fragment } from 'react'
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import ShopifyAppBridge from './components/ShopifyAppBridge'
+import ShopifyDashboardWrapper from './components/ShopifyDashboardWrapper'
+import ShopifyTestComponent from './components/ShopifyTestComponent'
+import ShopifyErrorBoundary from './components/ShopifyErrorBoundary'
 import SignIn from './Auth/SignIn'
 import SignUp from './Auth/SignUp'
 import CallNotification from './components/CallNotification'
@@ -45,6 +49,7 @@ import StaffRoot from './DashbordComponents/StaffRoot/StaffRoot'
 function App() {
   return (
     <Fragment>
+      <ShopifyAppBridge />
       <BrowserRouter>
         <AuthProvider>
           <AllUserProvider>
@@ -111,7 +116,12 @@ function App() {
               <Route path="/dashboard"
                 element={
                   <AdminRoute>
-                    <DashbordHome />
+                    <ShopifyErrorBoundary>
+                      <ShopifyDashboardWrapper>
+                        <DashbordHome />
+                        <ShopifyTestComponent />
+                      </ShopifyDashboardWrapper>
+                    </ShopifyErrorBoundary>
                   </AdminRoute>
                 }>
                 {/* Nasted Dashboard Route start */}
@@ -135,7 +145,11 @@ function App() {
               <Route path="/consultant-dashboard"
                 element={
                   // <ProtectRoute>
-                  <ConsultantHome />
+                  <ShopifyErrorBoundary>
+                    <ShopifyDashboardWrapper>
+                      <ConsultantHome />
+                    </ShopifyDashboardWrapper>
+                  </ShopifyErrorBoundary>
                   // </ProtectRoute>
                 }>
                 <Route path='homeconsultant' element={<HomeConsultant />} />

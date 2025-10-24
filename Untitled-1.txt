@@ -1,0 +1,1 @@
+https://rohit-12345839.myshopify.com/admin/oauth/authorize?client_id=9670f701d5332dc0e886440fd2277221&scope=read_themes&redirect_uri=http://localhost:5173/app/install

@@ -5,6 +5,42 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    
+    <!-- Content Security Policy for Shopify App Bridge -->
+    <meta http-equiv="Content-Security-Policy" content="frame-src app.shopify.com *.shopifyapps.com *.myshopify.com https://* shopify-pos://* hcaptcha.com *.hcaptcha.com https://localhost:* http://localhost:* http://localhost:5001/ http://localhost:5173/ blob: data:; connect-src https://*.shopify.com https://*.myshopify.com https://localhost:* http://localhost:* http://localhost:5001/ http://localhost:5173/ wss://localhost:* ws://localhost:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.shopify.com https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://cdn.shopify.com; img-src 'self' data: https: http:; font-src 'self' data: https:;">
+    
+    <!-- Shopify App Bridge Configuration -->
+    <meta name="shopify-api-key" content="9670f701d5332dc0e886440fd2277221" />
+    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+    
+    <!-- Suppress Shopify CDN CSP errors in development -->
+    <script>
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Suppress CSP framing errors from Shopify CDN
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+          const message = args[0];
+          if (typeof message === 'string' && 
+              (message.includes('Refused to frame') || 
+               message.includes('Content Security Policy') ||
+               message.includes('SendBeacon failed'))) {
+            // Suppress these errors in development
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+        
+        // Also suppress CSP violations in the console
+        window.addEventListener('securitypolicyviolation', function(e) {
+          if (e.violatedDirective.includes('frame-src') && 
+              (e.blockedURI.includes('localhost:5001') || e.blockedURI.includes('localhost:5173'))) {
+            e.preventDefault();
+            return false;
+          }
+        });
+      }
+    </script>
+    
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   </head>
