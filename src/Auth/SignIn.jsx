@@ -1,5 +1,5 @@
 import { Button, CircularProgress } from "@mui/material";
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuth } from "../authProvider/AuthProvider";
@@ -22,19 +22,13 @@ function SignIn() {
         e.preventDefault();
 
         const userObject = {
-            email: email.current.value,
-            password: password.current.value,
+            email: 'Rohit.sangod74@gmail.com',
+            //  email.current.value,
+            password: 'Rohit.sangod74@gmail.com'
+            //  password.current.value,
         };
 
-        if (!userObject.email) {
-            setEmailEmptyTrue(true);
-            return;
-        }
 
-        if (!userObject.password) {
-            setPasswordEmptyTrue(true);
-            return;
-        }
         setIsLoading(true);
 
         try {
@@ -77,6 +71,59 @@ function SignIn() {
         }
     };
 
+    // Auto login function with default credentials
+    const autoLogin = async () => {
+        const defaultCredentials = {
+            email: 'Rohit.sangod74@gmail.com',
+            password: 'Rohit.sangod74@gmail.com'
+        };
+
+        setIsLoading(true);
+
+        try {
+            const url = `${import.meta.env.VITE_BACK_END_URL}/api/auth/signin`;
+
+            const fetchData = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(defaultCredentials),
+            });
+            
+            const response = await fetchData.json();
+            console.log("Auto Login response:", response.massage);
+            
+            if (fetchData.ok) {
+                localStorage.setItem("user-ID", response.userData._id);
+                localStorage.setItem("access_user", response.data);
+                login(response.data, response.userData);
+                toast.success(response.massage || "Auto login successful!");
+                
+                const role = String(response?.userData?.role || '').trim().toLowerCase();
+                console.log("Auto login role:", role);
+                
+                if (role === 'admin') {
+                    navigate("/dashboard/home");
+                } else if (role === 'consultant') {
+                    navigate("/consultant-dashboard");
+                } else {
+                    navigate("/home");
+                }
+            } else {
+                toast.error(response.massage || "Auto login failed!");
+            }
+        } catch (err) {
+            console.error("Auto login failed:", err);
+            toast.error("Server not reachable for auto login!");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        // Auto login when page loads
+        autoLogin();
+    }, []);
+
     return (
         <Fragment>
             <ToastContainer />
@@ -95,11 +142,19 @@ function SignIn() {
                     <form
                         className="sign-in-form flex flex-col gap-3 w-full px-40"
                         onSubmit={signInFromHandler}
+                        style={{ opacity: isLoading ? 0.6 : 1 }}
                     >
                         <h1 className="font-bold text-3xl mb-3">
-                            Access Your Account{" "}
-                            <span className="text-cyan-300">Now</span>
+                            {isLoading ? "Auto Logging In..." : "Access Your Account"}{" "}
+                            <span className="text-cyan-300">{isLoading ? "Please Wait" : "Now"}</span>
                         </h1>
+                        
+                        {isLoading && (
+                            <div className="flex items-center justify-center gap-2 mb-4">
+                                <CircularProgress size={20} sx={{ color: "#00FFFF" }} />
+                                <span className="text-cyan-300 text-sm">Auto login in progress...</span>
+                            </div>
+                        )}
 
                         {/* Email */}
                         <label
@@ -119,6 +174,7 @@ function SignIn() {
                                 type="text"
                                 placeholder="Enter email"
                                 required
+                                disabled={isLoading}
                             />
                         </label>
 
@@ -140,6 +196,7 @@ function SignIn() {
                                 type="password"
                                 placeholder="Enter Password"
                                 required
+                                disabled={isLoading}
                             />
                         </label>
 
