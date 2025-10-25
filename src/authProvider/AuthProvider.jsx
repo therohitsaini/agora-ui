@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
    const loadUserFromApi = async (token) => {
       try {
-         const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
+         const backendUrl = import.meta.env.VITE_BACK_END_URL 
          const id = localStorage.getItem('user-ID');
          if (!id) return null;
          const res = await fetch(`${backendUrl}/api/users/${id}`, {
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
    const fetchverifyToken = async (token) => {
       try {
-         const backendUrl = import.meta.env.VITE_BACK_END_URL || 'http://localhost:3001';
+         const backendUrl = import.meta.env.VITE_BACK_END_URL
          
     
          const fetchData = await fetch(`${backendUrl}/api/auth/token-verify`, {

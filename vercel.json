@@ -9,8 +9,25 @@
     },
     "rewrites": [
         {
-            "source": "/(.*)",
-            "destination": "/"
+            "source": "/((?!api/).*)",
+            "destination": "/index.html"
+        }
+    ],
+    "functions": {
+        "app/api/**/*.js": {
+            "runtime": "nodejs20.x"
+        }
+    },
+    "redirects": [
+        {
+            "source": "/dashboard",
+            "destination": "/",
+            "permanent": false
+        },
+        {
+            "source": "/consultant-dashboard",
+            "destination": "/",
+            "permanent": false
         }
     ],
     "headers": [
