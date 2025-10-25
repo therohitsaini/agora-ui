@@ -138,13 +138,13 @@ function SignIn() {
             )}
             <div className="main-container h-screen w-full flex hidden">
                 {/* Left Side Image */}
-                <div className="img-main h-full w-[40%]">
+                {/* <div className="img-main h-full w-[40%]">
                     <img
                         className="h-full w-full object-cover"
                         src="https://cdn-cm.freepik.com/previews/51db95ba-51fd-4f85-821e-0d90d5d7dbc8.jpg?w=500&h=500"
                         alt="Login Banner"
                     />
-                </div>
+                </div> */}
 
                 {/* Right Side Form */}
                 <div className="form-main h-full w-[60%] flex justify-center items-center">
@@ -153,20 +153,20 @@ function SignIn() {
                         onSubmit={signInFromHandler}
                         style={{ opacity: isLoading ? 0.6 : 1 }}
                     >
-                        <h1 className="font-bold text-3xl mb-3">
+                        {/* <h1 className="font-bold text-3xl mb-3">
                             {isLoading ? "Auto Logging In..." : "Access Your Account"}{" "}
                             <span className="text-cyan-300">{isLoading ? "Please Wait" : "Now"}</span>
-                        </h1>
+                        </h1> */}
                         
-                        {isLoading && (
+                        {/* {isLoading && (
                             <div className="flex items-center justify-center gap-2 mb-4">
                                 <CircularProgress size={20} sx={{ color: "#00FFFF" }} />
                                 <span className="text-cyan-300 text-sm">Auto login in progress...</span>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Email */}
-                        <label
+                        {/* <label
                             className={`flex flex-col shadow-sm shadow-black/10 pt-1 ${emailEmptyTrue ? "bg-red-400/20" : ""
                                 }`}
                         >
@@ -185,10 +185,10 @@ function SignIn() {
                                 required
                                 disabled={isLoading}
                             />
-                        </label>
+                        </label> */}
 
                         {/* Password */}
-                        <label
+                        {/* <label
                             className={`flex flex-col shadow-sm shadow-black/10 pt-1 ${passwordEmptyTrue ? "bg-red-400/20" : ""
                                 }`}
                         >
@@ -207,17 +207,17 @@ function SignIn() {
                                 required
                                 disabled={isLoading}
                             />
-                        </label>
+                        </label> */}
 
                         {/* Forget Password */}
-                        <div className="flex gap-2 font-semibold justify-end text-sm">
+                        {/* <div className="flex gap-2 font-semibold justify-end text-sm">
                             <p
                                 onClick={() => setForgetPassword(!forgetPassword)}
                                 className="underline text-blue-600 cursor-pointer"
                             >
                                 Forget Password
                             </p>
-                        </div>
+                        </div> */}
 
                         {/* Submit Button */}
                         <Button
@@ -227,26 +227,27 @@ function SignIn() {
                                 fontSize: 14,
                                 p: 1,
                                 color: "white",
-                                bgcolor: isLoading ? "#686262" : "black",
+                                bgcolor:'none',
+                                 
                                 border: "none",
                                 "&:hover": { bgcolor: "gray.800" },
                             }}
                             disabled={isLoading} // disable while loading
                         >
-                            {isLoading ? (
+                            {/* {isLoading ? (
                                 <CircularProgress size={20} sx={{ color: "white" }} />
                             ) : (
                                 "Sign in"
-                            )}
+                            )} */}
                         </Button>
 
                         {/* Sign Up Link */}
-                        <div className="flex gap-2 font-semibold justify-end">
+                        {/* <div className="flex gap-2 font-semibold justify-end">
                             <p className="underline">Don’t have an account?</p>
                             <Link to="/signup" className="font-bold text-blue-600">
                                 Sign up
                             </Link>
-                        </div>
+                        </div> */}
                     </form>
                 </div>
             </div>
