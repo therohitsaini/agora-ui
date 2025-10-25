@@ -11,6 +11,7 @@ function SignIn() {
     const [emailEmptyTrue, setEmailEmptyTrue] = useState(false);
     const [passwordEmptyTrue, setPasswordEmptyTrue] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isAutoLogin, setIsAutoLogin] = useState(false);
 
     const email = useRef("");
     const password = useRef("");
@@ -19,6 +20,7 @@ function SignIn() {
     // const dispatch = useDispatch();
 
     const signInFromHandler = async (e) => {
+        setIsAutoLogin(true);
         e.preventDefault();
 
         const userObject = {
@@ -103,6 +105,7 @@ function SignIn() {
                 
                 if (role === 'admin') {
                     navigate("/dashboard/home");
+                    setIsAutoLogin(false);
                 } else if (role === 'consultant') {
                     navigate("/consultant-dashboard");
                 } else {
@@ -127,6 +130,12 @@ function SignIn() {
     return (
         <Fragment>
             <ToastContainer />
+            {isAutoLogin && (
+                <div className="flex items-center justify-center gap-2 mb-4">
+                    <CircularProgress size={20} sx={{ color: "#00FFFF" }} />
+                    <span className="text-cyan-300 text-sm">Auto login in progress...</span>
+                </div>
+            )}
             <div className="main-container h-screen w-full flex">
                 {/* Left Side Image */}
                 <div className="img-main h-full w-[40%]">
