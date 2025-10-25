@@ -55,6 +55,15 @@ function App() {
                     <SignIn />
                   </PublicRoute>
                 }
+
+
+
+
+
+
+
+
+                
               />
               <Route path="/signup"
                 element={
