@@ -1,8 +1,6 @@
 import React, { useContext } from 'react'
 import { Fragment } from 'react'
 import Overview from '../../Utils/Overview'
-import { PageViewsBarChart } from '../../Charts/SparklineChart'
-import SessionsChart from '../../Charts/SessionsChart'
 import UserDetails from './UserDetails'
 import { Box } from '@mui/material'
 import { allUserDetailsContext } from '../ApiContext/ApiContextUserData'
@@ -16,10 +14,6 @@ function HomeContent() {
     return (
         <Fragment>
             <Overview overViewLength={overViewLength} cardData={cardData} />
-            <div className='flex gap-5 mt-5 my-5'>
-                <SessionsChart />
-                <PageViewsBarChart />
-            </div>
             <Box
                 sx={{
 

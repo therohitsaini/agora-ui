@@ -1,8 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import Overview from '../../Utils/Overview'
 
-import SessionsChart from '../../Charts/SessionsChart'
-import { PageViewsBarChart } from '../../Charts/SparklineChart'
+// Charts removed to fix createSelector error
 import DataGridTable from '../../components/DataGridTable'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
@@ -147,10 +146,6 @@ function HomeConsultant() {
                <IncomingCallPopup incoming={incoming} accept={accept} reject={reject} />
             )}
          <Overview totalClients={callsHistory} />
-         <div className='flex gap-5 mt-5 my-5'>
-            <SessionsChart />
-            <PageViewsBarChart />
-         </div>
          <Box sx={{ width: '100%' }}>
             <Typography variant='h6' className='text-white' sx={{ fontSize: '1.5rem', mb: 1, textUnderlineOffset: '10px' }}>Calls History</Typography>
             <DataGridTable columns={columns} rows={rows} />
