@@ -1,4 +1,7 @@
 {
+    "buildCommand": "npm run build:vercel",
+    "outputDirectory": "dist",
+    "installCommand": "npm install --legacy-peer-deps",
     "build": {
         "env": {
             "NODE_VERSION": "20"
