@@ -133,10 +133,10 @@ function SignIn() {
             {isAutoLogin && (
                 <div className="flex items-center justify-center gap-2 mb-4">
                     <CircularProgress size={20} sx={{ color: "#00FFFF" }} />
-                    <span className="text-cyan-300 text-sm">Auto login in progress...</span>
+                 
                 </div>
             )}
-            <div className="main-container h-screen w-full flex">
+            <div className="main-container h-screen w-full flex hidden">
                 {/* Left Side Image */}
                 <div className="img-main h-full w-[40%]">
                     <img
