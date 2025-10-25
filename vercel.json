@@ -1,33 +1,8 @@
 {
-    "buildCommand": "npm run build:vercel",
-    "outputDirectory": "dist",
-    "installCommand": "npm install --legacy-peer-deps",
-    "build": {
-        "env": {
-            "NODE_VERSION": "20"
-        }
-    },
     "rewrites": [
         {
-            "source": "/((?!api/).*)",
-            "destination": "/index.html"
-        }
-    ],
-    "functions": {
-        "app/api/**/*.js": {
-            "runtime": "nodejs20.x"
-        }
-    },
-    "redirects": [
-        {
-            "source": "/dashboard",
-            "destination": "/",
-            "permanent": false
-        },
-        {
-            "source": "/consultant-dashboard",
-            "destination": "/",
-            "permanent": false
+            "source": "/(.*)",
+            "destination": "/"
         }
     ],
     "headers": [
