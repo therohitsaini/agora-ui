@@ -6,7 +6,7 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async (id) => {
     return response.json();
 });
 export const fetchConsultantUsers = createAsyncThunk('users/fetchConsultantUsers', async (id) => {
-    const response = await fetch(`http://localhost:3001/api-consultant/consultant-all-user-history`);
+    const response = await fetch(`${import.meta.env.VITE_BACK_END_URL}/api-consultant/consultant-all-user-history`);
     return response.json();
 });
 

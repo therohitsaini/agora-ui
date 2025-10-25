@@ -38,6 +38,8 @@ function AdminTabs() {
         dispatch(fetchConsultantUsers())
     }, [id])
 
+    console.log("consultantList", consultantList)
+
     if (!consultantList || !Array.isArray(consultantList.historyConsultantUser)) {
         return <div className='flex justify-center items-center h-[80vh]'>
             <svg width={0} height={0}>
