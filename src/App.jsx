@@ -40,6 +40,7 @@ import CallHistory from './DashbordComponents/DashbordPages/CallHistory'
 import VideoCallHistory from './DashbordComponents/DashbordPages/VideoCallHistory'
 import VoiceCallHistory from './DashbordComponents/DashbordPages/VoiceCallHistory'
 import StaffRoot from './DashbordComponents/StaffRoot/StaffRoot'
+import Shopifyest from './components/Shopifyest'
 
 
 function App() {
@@ -114,6 +115,7 @@ function App() {
                     <DashbordHome />
                   </AdminRoute>
                 }>
+                <Route path="apps/pages-vc" element={<Shopifyest />} />
                 {/* Nasted Dashboard Route start */}
                 <Route path="home" element={<HomeContent />} />
                 <Route path="analytics" element={<Anlaylics />} />

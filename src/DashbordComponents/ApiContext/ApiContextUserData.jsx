@@ -15,7 +15,7 @@ export const AllUserProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const url = `${import.meta.env.VITE_BACK_END_URL}/api/users/user-details`;
+            const url = `/api/users/user-details`;
 
             const res = await fetch(url, {
                 method: "GET",
