@@ -40,7 +40,7 @@ import CallHistory from './DashbordComponents/DashbordPages/CallHistory'
 import VideoCallHistory from './DashbordComponents/DashbordPages/VideoCallHistory'
 import VoiceCallHistory from './DashbordComponents/DashbordPages/VoiceCallHistory'
 import StaffRoot from './DashbordComponents/StaffRoot/StaffRoot'
-import Shopifyest from './components/Shopifyest'
+import Shopifytest from './components/Shopifytest'
 
 
 function App() {
@@ -108,14 +108,14 @@ function App() {
               <Route path="/chat-web" element={<WebChatBox />} />
               <Route path="/send-gift" element={<SendGift />} />
               <Route path="/user-profile-section" element={<UserProfileSection />} />
-         
+              <Route path="/apps/pages-vc" element={<Shopifytest />} />
               <Route path="/dashboard"
                 element={
                   <AdminRoute>
                     <DashbordHome />
                   </AdminRoute>
                 }>
-                <Route path="apps/pages-vc" element={<Shopifyest />} />
+            
                 {/* Nasted Dashboard Route start */}
                 <Route path="home" element={<HomeContent />} />
                 <Route path="analytics" element={<Anlaylics />} />
