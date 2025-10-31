@@ -215,7 +215,7 @@ function ConsultantMajorDetails() {
 
    return (
       <div className='w-full h-full'>
-         <Navbar />
+         {/* <Navbar /> */}
          <ToastContainer />
          <InsufficientBalanceAlert open={callFailed} onClose={resetCallFailed} />
          <Box sx={{

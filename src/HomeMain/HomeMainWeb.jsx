@@ -27,7 +27,7 @@ console.log("allConsultant", allConsultant)
   return (
     <Fragment>
       <div>
-        <Navbar />
+        {/* <Navbar /> */}
         {/* <AnimatedHero> */}
         <Box sx={{
           minHeight: '100vh',
