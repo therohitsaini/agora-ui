@@ -41,7 +41,7 @@ import VideoCallHistory from './DashbordComponents/DashbordPages/VideoCallHistor
 import VoiceCallHistory from './DashbordComponents/DashbordPages/VoiceCallHistory'
 import StaffRoot from './DashbordComponents/StaffRoot/StaffRoot'
 import Shopifytest from './components/Shopifytest'
-
+import ConsultantRegistraionForm from './components/ConsultantRegistraionForm'
 
 function App() {
   return (
@@ -109,6 +109,7 @@ function App() {
               <Route path="/send-gift" element={<SendGift />} />
               <Route path="/user-profile-section" element={<UserProfileSection />} />
               <Route path="/apps/pages-vcccc" element={<Shopifytest />} />
+              <Route path="/consultant-registration" element={<ConsultantRegistraionForm />} />
               <Route path="/dashboard"
                 element={
                   <AdminRoute>
